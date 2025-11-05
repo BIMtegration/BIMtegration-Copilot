@@ -1,0 +1,99 @@
+{
+  "format": 1,
+  "restore": {
+    "H:\\Mi unidad\\APPS\\BIMTEGRACION\\BIMtegration Copilot\\RoslynCopilotTest\\RoslynCopilotTest.csproj": {}
+  },
+  "projects": {
+    "H:\\Mi unidad\\APPS\\BIMTEGRACION\\BIMtegration Copilot\\RoslynCopilotTest\\RoslynCopilotTest.csproj": {
+      "version": "2.0.0",
+      "restore": {
+        "projectUniqueName": "H:\\Mi unidad\\APPS\\BIMTEGRACION\\BIMtegration Copilot\\RoslynCopilotTest\\RoslynCopilotTest.csproj",
+        "projectName": "CodeAssistantPro",
+        "projectPath": "H:\\Mi unidad\\APPS\\BIMTEGRACION\\BIMtegration Copilot\\RoslynCopilotTest\\RoslynCopilotTest.csproj",
+        "packagesPath": "C:\\Users\\geren\\.nuget\\packages\\",
+        "outputPath": "H:\\Mi unidad\\APPS\\BIMTEGRACION\\BIMtegration Copilot\\RoslynCopilotTest\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\geren\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "targetAlias": "net48",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "targetAlias": "net48",
+          "dependencies": {
+            "CsvHelper": {
+              "target": "Package",
+              "version": "[30.0.1, )"
+            },
+            "EPPlus": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
+            "IdentityModel.OidcClient": {
+              "target": "Package",
+              "version": "[5.2.1, )"
+            },
+            "Microsoft.CodeAnalysis.CSharp.Scripting": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
+            "Microsoft.CodeAnalysis.Scripting": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
+            "Microsoft.NETFramework.ReferenceAssemblies": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[1.0.3, )",
+              "autoReferenced": true
+            },
+            "Microsoft.Web.WebView2": {
+              "target": "Package",
+              "version": "[1.0.3537.50, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "System.Net.Http": {
+              "target": "Package",
+              "version": "[4.3.4, )"
+            },
+            "System.Security.Cryptography.ProtectedData": {
+              "target": "Package",
+              "version": "[6.0.0, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414\\RuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    }
+  }
+}
