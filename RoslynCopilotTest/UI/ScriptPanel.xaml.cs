@@ -98,10 +98,9 @@ namespace RoslynCopilotTest.UI
         {
             _bimAuthService = new BIMAuthService();
             
-            // ⚠️ LOGOUT AUTOMÁTICO AL INICIAR - Forzar que los usuarios hagan login cada vez
-            _bimAuthService.Logout();
-            SecureTokenStorage.DeleteToken();
-            System.Diagnostics.Debug.WriteLine("[ScriptPanel] Sesión limpiada - Usuarios deben hacer login");
+            // Token se preserva si existe de login anterior
+            // NO borrar el token aquí - permitir que persista para botones premium
+            System.Diagnostics.Debug.WriteLine($"[ScriptPanel] Sesión cargada - Autenticado: {_bimAuthService.IsAuthenticated}");
             
             // APLICAR TEMA OSCURO PRIMERO - ANTES DE CREAR UI
             this.Background = new SolidColorBrush(WpfColor.FromRgb(45, 45, 48));

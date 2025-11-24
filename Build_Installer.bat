@@ -86,13 +86,13 @@ echo ========================================
 echo.
 
 :: Mostrar ubicación del instalador
-if exist "Installer\BIMtegration_Copilot_Setup_v1.0.3.exe" (
+if exist "Installer\BIMtegration_Copilot_Setup_v1.0.4.exe" (
     echo Instalador generado en:
-    echo %cd%\Installer\BIMtegration_Copilot_Setup_v1.0.3.exe
+    echo %cd%\Installer\BIMtegration_Copilot_Setup_v1.0.4.exe
     echo.
     
     :: Obtener tamaño del archivo
-    for %%A in ("Installer\BIMtegration_Copilot_Setup_v1.0.3.exe") do (
+    for %%A in ("Installer\BIMtegration_Copilot_Setup_v1.0.4.exe") do (
         set "SIZE=%%~zA"
     )
     

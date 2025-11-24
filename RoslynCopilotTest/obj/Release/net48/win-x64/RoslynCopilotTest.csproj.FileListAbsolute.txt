@@ -47,3 +47,4 @@ H:\Mi unidad\APPS\BIMTEGRACION\BIMtegration Copilot\RoslynCopilotTest\obj\Releas
 H:\Mi unidad\APPS\BIMTEGRACION\BIMtegration Copilot\RoslynCopilotTest\obj\Release\net48\win-x64\RoslynCo.403EB9B3.Up2Date
 H:\Mi unidad\APPS\BIMTEGRACION\BIMtegration Copilot\RoslynCopilotTest\obj\Release\net48\win-x64\CodeAssistantPro.dll
 H:\Mi unidad\APPS\BIMTEGRACION\BIMtegration Copilot\RoslynCopilotTest\obj\Release\net48\win-x64\CodeAssistantPro.pdb
+H:\Mi unidad\APPS\BIMTEGRACION\BIMtegration Copilot\RoslynCopilotTest\obj\Release\net48\win-x64\RoslynCopilotTest.sourcelink.json

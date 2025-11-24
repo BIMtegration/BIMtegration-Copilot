@@ -42,6 +42,19 @@ namespace RoslynCopilotTest.Services
         public UserInfo CurrentUser => _currentUser;
 
         /// <summary>
+        /// Token JWT actual (propiedad pública para acceso desde scripts)
+        /// </summary>
+        public string CurrentToken => _currentToken;
+
+        /// <summary>
+        /// Obtiene el token de forma sincrónica (para uso desde scripts)
+        /// </summary>
+        public string GetToken()
+        {
+            return _currentToken;
+        }
+
+        /// <summary>
         /// Realiza login con usuario y contraseña
         /// </summary>
         public async Task<LoginResult> LoginAsync(string usuario, string clave)
@@ -237,19 +250,34 @@ namespace RoslynCopilotTest.Services
 
                     if (validationResponse?.ok != true)
                     {
-                        // Token inválido, limpiar sesión
+                        // Token inválido (firma, expirado, etc)
+                        System.Diagnostics.Debug.WriteLine("Validación del token fallida: Token inválido o expirado");
                         Logout();
                         return false;
                     }
 
+                    System.Diagnostics.Debug.WriteLine("Token validado correctamente");
                     return true;
                 }
             }
-            catch
+            catch (HttpRequestException ex)
             {
-                // En caso de error de red, asumir que el token puede ser válido
-                // (no forzar logout por problemas de conectividad)
-                return !string.IsNullOrEmpty(_currentToken);
+                // Error de red - no forzar logout, pero registrar
+                System.Diagnostics.Debug.WriteLine($"Error de red al validar token: {ex.Message}. Token puede ser válido pero no se pudo verificar.");
+                // Retornar false para que se requiera re-login
+                return false;
+            }
+            catch (TaskCanceledException ex)
+            {
+                // Timeout en la validación
+                System.Diagnostics.Debug.WriteLine($"Timeout al validar token: {ex.Message}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                // Error inesperado
+                System.Diagnostics.Debug.WriteLine($"Error inesperado al validar token: {ex.Message}");
+                return false;
             }
         }
 
@@ -328,14 +356,29 @@ namespace RoslynCopilotTest.Services
                         Plan = tokenData.Plan
                     };
 
-                    // Validar token en background (no bloquear inicio)
-                    Task.Run(async () =>
+                    // Validar token con timeout (máx 5 segundos)
+                    // Si falla, limpiar para forzar nuevo login
+                    try
                     {
-                        if (!await ValidateTokenAsync())
+                        var validationTask = ValidateTokenAsync();
+                        if (!validationTask.Wait(TimeSpan.FromSeconds(5)))
                         {
-                            System.Diagnostics.Debug.WriteLine("Token guardado inválido, requiere re-login");
+                            // Timeout - considerar token inválido
+                            System.Diagnostics.Debug.WriteLine("Validación de token expirada (timeout), requiere re-login");
+                            ClearSavedToken();
                         }
-                    });
+                        else if (!validationTask.Result)
+                        {
+                            // Validación fallida explícitamente
+                            System.Diagnostics.Debug.WriteLine("Token guardado inválido, requiere re-login");
+                            // ClearSavedToken() ya fue llamado en ValidateTokenAsync
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error validando token guardado: {ex.Message}, requiere re-login");
+                        ClearSavedToken();
+                    }
                 }
             }
             catch (Exception ex)

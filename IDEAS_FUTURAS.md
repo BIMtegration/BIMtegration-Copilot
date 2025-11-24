@@ -6,100 +6,7 @@
 
 ---
 
-## 📦 1. Marketplace Interno de Scripts
-
-### Descripción
-Sistema para compartir scripts entre usuarios del equipo o empresa.
-
-### Características
-- **Rating y reviews**: Los usuarios pueden calificar scripts (⭐⭐⭐⭐⭐)
-- **Estadísticas de uso**: Contador de descargas/importaciones
-- **Autor y atribución**: Metadata automática con nombre del creador
-- **Categorización avanzada**: Tags, búsqueda por palabras clave
-- **Scripts destacados**: Los más populares aparecen primero
-
-### Metadata necesaria
-```json
-{
-  "Author": "Gerencio López",
-  "AuthorEmail": "gerencio@example.com",
-  "Company": "BIM Engineering Corp",
-  "Rating": 4.5,
-  "Downloads": 127,
-  "Tags": ["structural", "analysis", "automation"],
-  "LastUpdated": "2025-10-15",
-  "License": "MIT"
-}
-```
-
-### Beneficios
-- ✅ Centralizar conocimiento del equipo
-- ✅ Evitar duplicar trabajo
-- ✅ Promover mejores prácticas
-- ✅ Colaboración entre departamentos
-
----
-
-## 🔄 2. Control de Versiones de Scripts
-
-### Descripción
-Sistema para detectar y actualizar scripts cuando hay versiones nuevas disponibles.
-
-### Características
-- **Detección automática**: Al abrir Revit, verifica si hay actualizaciones
-- **Changelog**: Mostrar qué cambió en cada versión
-- **Actualización selectiva**: Usuario elige qué scripts actualizar
-- **Rollback**: Volver a versión anterior si algo falla
-- **Historial de cambios**: Ver todas las versiones previas
-
-### Metadata necesaria
-```json
-{
-  "Version": "2.1.0",
-  "PreviousVersion": "2.0.5",
-  "VersionHistory": [
-    {
-      "Version": "2.1.0",
-      "Date": "2025-10-15",
-      "Changes": [
-        "Added support for Excel export",
-        "Fixed bug with wall selection",
-        "Performance improvements"
-      ]
-    },
-    {
-      "Version": "2.0.5",
-      "Date": "2025-09-20",
-      "Changes": ["Initial release"]
-    }
-  ],
-  "BreakingChanges": false
-}
-```
-
-### UI Propuesta
-```
-╔════════════════════════════════════════════════╗
-║   🔄 Actualizaciones Disponibles               ║
-╠════════════════════════════════════════════════╣
-║                                                ║
-║  📊 Export Walls to Excel                     ║
-║     v2.0.5 → v2.1.0                           ║
-║     ✨ Nueva funcionalidad de formato         ║
-║     🐛 Corrección de bug con niveles          ║
-║     [Ver detalles] [Actualizar]               ║
-║                                                ║
-║  🌐 API Integration Script                    ║
-║     v1.5.0 → v2.0.0 ⚠️ BREAKING CHANGES      ║
-║     [Ver detalles] [Saltar]                   ║
-║                                                ║
-║        [Actualizar Todo]    [Cancelar]        ║
-╚════════════════════════════════════════════════╝
-```
-
----
-
-## 🔗 3. Gestión de Dependencias
+## 🔗 1. Gestión de Dependencias
 
 ### Descripción
 Validar automáticamente que el entorno tiene todos los requisitos antes de ejecutar un script.
@@ -159,7 +66,7 @@ Validar automáticamente que el entorno tiene todos los requisitos antes de ejec
 
 ---
 
-## 💾 4. Backups Automáticos con Timestamp
+## 💾 2. Backups Automáticos con Timestamp
 
 ### Descripción
 Sistema de respaldo automático de scripts con historial temporal.
@@ -215,91 +122,7 @@ Sistema de respaldo automático de scripts con historial temporal.
 
 ---
 
-## 👥 5. Sincronización en Equipo
-
-### Descripción
-Compartir scripts en tiempo real con otros miembros del equipo.
-
-### Características
-- **Carpeta compartida de red**: Scripts en servidor centralizado
-- **Notificaciones de cambios**: "Juan actualizó 'Export Beams'"
-- **Control de conflictos**: Si 2 personas editan el mismo script
-- **Permisos por rol**: Admin, Editor, Viewer
-- **Log de actividad**: Quién modificó qué y cuándo
-
-### Metadata necesaria
-```json
-{
-  "TeamSync": {
-    "SharedLocation": "\\\\SERVER\\BIM\\Scripts\\",
-    "LastSyncDate": "2025-10-15T15:45:00",
-    "ModifiedBy": {
-      "User": "Juan Pérez",
-      "Email": "juan.perez@example.com",
-      "Date": "2025-10-15T15:30:00",
-      "Computer": "WS-BIM-05"
-    },
-    "EditHistory": [
-      {
-        "User": "Gerencio López",
-        "Action": "Created",
-        "Date": "2025-10-01T10:00:00"
-      },
-      {
-        "User": "María García",
-        "Action": "Modified",
-        "Date": "2025-10-10T14:20:00",
-        "Changes": "Added error handling"
-      },
-      {
-        "User": "Juan Pérez",
-        "Action": "Modified",
-        "Date": "2025-10-15T15:30:00",
-        "Changes": "Updated API endpoint"
-      }
-    ],
-    "Permissions": {
-      "Owner": "Gerencio López",
-      "Editors": ["María García", "Juan Pérez"],
-      "Viewers": ["*"]
-    }
-  }
-}
-```
-
-### UI de Sincronización
-```
-╔════════════════════════════════════════════════╗
-║   🔄 Centro de Sincronización                  ║
-╠════════════════════════════════════════════════╣
-║                                                ║
-║  Estado: 🟢 Conectado al servidor             ║
-║  Última sincronización: Hace 5 minutos        ║
-║                                                ║
-║  📥 Cambios remotos disponibles (3):          ║
-║                                                ║
-║  📊 Export Walls to Excel                     ║
-║     Modificado por: Juan Pérez                ║
-║     Hace: 10 minutos                          ║
-║     Cambios: "Updated API endpoint"           ║
-║     [Ver diff] [Descargar]                    ║
-║                                                ║
-║  🌐 API Integration                           ║
-║     Modificado por: María García              ║
-║     Hace: 2 horas                             ║
-║     [Ver diff] [Descargar]                    ║
-║                                                ║
-║  ⚠️ CONFLICTO: Room Analysis                  ║
-║     Tu versión vs servidor                    ║
-║     [Resolver conflicto...]                   ║
-║                                                ║
-║  [Sincronizar Todo] [Ver Actividad] [Cerrar] ║
-╚════════════════════════════════════════════════╝
-```
-
----
-
-## 🎨 6. Templates y Scaffolding
+## 🎨 3. Templates y Scaffolding
 
 ### Descripción
 Plantillas pre-configuradas para crear scripts comunes más rápido.
@@ -383,7 +206,7 @@ Plantillas pre-configuradas para crear scripts comunes más rápido.
 
 ---
 
-## 📊 7. Analytics y Estadísticas
+## 📊 4. Analytics y Estadísticas
 
 ### Descripción
 Panel de estadísticas sobre uso de scripts y productividad.
@@ -428,74 +251,7 @@ Panel de estadísticas sobre uso de scripts y productividad.
 
 ---
 
-## 🔐 8. Seguridad y Permisos
-
-### Descripción
-Control de acceso para scripts sensibles o administrativos.
-
-### Características
-- **Scripts protegidos**: Requieren contraseña/PIN
-- **Roles y permisos**: Admin, Power User, User
-- **Auditoría**: Log de quién ejecutó qué script
-- **Scripts firmados**: Verificación de integridad con hash
-- **Sandbox**: Ejecutar scripts en entorno aislado
-
-### Metadata necesaria
-```json
-{
-  "Security": {
-    "RequiresPermission": "Admin",
-    "ProtectionLevel": "High",
-    "AllowedUsers": ["gerencio.lopez", "admin"],
-    "AllowedGroups": ["BIM-Managers"],
-    "RequiresPassword": false,
-    "SignedBy": {
-      "Author": "Gerencio López",
-      "Signature": "SHA256:a3f5c8d9...",
-      "Date": "2025-10-15"
-    },
-    "AuditLog": true,
-    "Sandbox": false,
-    "DangerousOperations": [
-      "File deletion",
-      "Registry modification"
-    ]
-  }
-}
-```
-
----
-
-## 🌐 9. Integración con Servicios Cloud
-
-### Descripción
-Conectar con servicios externos para sincronizar, almacenar y compartir.
-
-### Integraciones sugeridas
-- **GitHub/GitLab**: Sincronizar scripts como repositorio
-- **OneDrive/Dropbox**: Almacenamiento en la nube
-- **Slack/Teams**: Notificaciones de cambios
-- **Trello/Jira**: Vincular scripts con tareas
-- **Google Sheets**: Export automático de datos
-
-### Ejemplo: GitHub Integration
-```json
-{
-  "GitHubIntegration": {
-    "Repository": "my-company/revit-scripts",
-    "Branch": "main",
-    "AutoSync": true,
-    "SyncInterval": "1 hour",
-    "LastSync": "2025-10-15T15:00:00",
-    "CommitMessage": "Updated export script with new filters",
-    "RemoteURL": "https://github.com/my-company/revit-scripts"
-  }
-}
-```
-
----
-
-## 🤖 10. AI-Powered Features
+## 🤖 5. AI-Powered Features
 
 ### Descripción
 Usar inteligencia artificial para mejorar scripts y sugerir optimizaciones.
@@ -542,59 +298,7 @@ Usar inteligencia artificial para mejorar scripts y sugerir optimizaciones.
 
 ---
 
-## 📱 11. Mobile Companion App
-
-### Descripción
-App móvil para ejecutar scripts remotamente o ver estadísticas.
-
-### Características
-- **Ejecución remota**: Trigger scripts desde el móvil
-- **Notificaciones push**: "Script terminó con éxito"
-- **Dashboard móvil**: Ver estadísticas en tiempo real
-- **QR Code**: Compartir scripts via código QR
-- **Voice commands**: "Ejecutar export de muros"
-
----
-
-## 🎯 12. Task Automation & Scheduling
-
-### Descripción
-Programar ejecución automática de scripts.
-
-### Características
-- **Cron jobs**: "Ejecutar cada viernes a las 18:00"
-- **Triggers basados en eventos**: "Al abrir archivo", "Al guardar"
-- **Workflows**: Encadenar múltiples scripts
-- **Conditional execution**: "Si el modelo tiene >1000 elementos"
-
-### UI
-```
-╔════════════════════════════════════════════════╗
-║   ⏰ Programar Tarea                           ║
-╠════════════════════════════════════════════════╣
-║                                                ║
-║  Script: [Export Walls to Excel ▼]            ║
-║                                                ║
-║  🔘 Ejecutar una vez                          ║
-║     Fecha: [2025-10-20] Hora: [14:00]        ║
-║                                                ║
-║  ⚪ Repetir periódicamente                    ║
-║     Cada: [1 ▼] [Semana ▼]                   ║
-║     Día: [Viernes ▼] Hora: [18:00]           ║
-║                                                ║
-║  ⚪ Basado en evento                          ║
-║     Evento: [Al abrir documento ▼]            ║
-║                                                ║
-║  ☑ Solo si el documento tiene cambios        ║
-║  ☑ Enviar notificación al terminar           ║
-║                                                ║
-║  [Programar] [Cancelar]                       ║
-╚════════════════════════════════════════════════╝
-```
-
----
-
-## 🎓 13. Learning & Documentation Hub
+## 🎓 6. Learning & Documentation Hub
 
 ### Descripción
 Centro de aprendizaje integrado con tutoriales y ejemplos.
@@ -608,41 +312,5 @@ Centro de aprendizaje integrado con tutoriales y ejemplos.
 
 ---
 
-## 📋 PRIORIZACIÓN SUGERIDA
-
-### 🔥 Alta Prioridad (3-6 meses)
-1. ✅ **Backups Automáticos** - Crítico para seguridad
-2. ✅ **Control de Versiones** - Gran valor para equipos
-3. ✅ **Templates y Scaffolding** - Mejora productividad
-
-### 🚀 Media Prioridad (6-12 meses)
-4. ✅ **Analytics Dashboard** - Métricas útiles
-5. ✅ **Gestión de Dependencias** - Previene errores
-6. ✅ **Sincronización en Equipo** - Colaboración
-
-### 💡 Baja Prioridad (12+ meses)
-7. ✅ **Marketplace Interno** - Requiere infraestructura
-8. ✅ **AI-Powered Features** - Innovador pero complejo
-9. ✅ **Mobile App** - Nice to have
-10. ✅ **Cloud Integration** - Dependencias externas
-
----
-
-## 📝 NOTAS ADICIONALES
-
-- Todas estas funcionalidades son **compatibles con la arquitectura actual**
-- La metadata JSON está **diseñada para ser extensible** sin romper compatibilidad
-- Puedes implementar features de forma **incremental** sin afectar lo existente
-- Considera crear **branches de Git** para features grandes
-- Documenta cada feature nueva en `CHANGELOG.md`
-
----
-
-**¡Mucho éxito probando la importación! 🚀**  
-**Vuelve con feedback y seguimos desarrollando estas ideas.**
-
----
-
-_Archivo creado el: 15 de Octubre, 2025_  
-_Última actualización: 15 de Octubre, 2025_  
-_Autor: Gerencio López (con asistencia de GitHub Copilot)_
+CORRECCIONES SIGUIENTE VERSION:
+1. El Select de la pestaña Basic, que se llena con las categorias de los botones de esa pestaña, está mostrando el contenido duplicado (si se actualiza con las categorias de los botones, solo que se duplica el contenido).

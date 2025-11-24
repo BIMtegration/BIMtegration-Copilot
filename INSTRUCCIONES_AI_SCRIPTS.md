@@ -499,3 +499,941 @@ if (p == null)
 6. Seguir patrones específicos para APIs externas
 
 Estas instrucciones contienen toda la información necesaria para generar código funcional y robusto en BIMtegration Copilot.
+
+# 📋 Sistema de Logs Debug - BIMtegration Copilot
+
+## 🎯 Descripción General
+
+BIMtegration Copilot cuenta con un **sistema integrado de logging** que permite:
+- ✅ Registrar eventos del sistema automáticamente
+- ✅ Visualizar logs en tiempo real en la UI
+- ✅ Debuggear problemas de premium buttons
+- ✅ Auditar acciones de usuarios
+- ✅ Guardar historial persistente
+
+---
+
+## 📍 Ubicación de los Logs
+
+### En el Sistema de Archivos:
+```
+C:\Users\[USERNAME]\AppData\Roaming\RoslynCopilot\
+└── premium-buttons-debug.log
+```
+
+### En la Interfaz:
+```
+BIMtegration Copilot
+  └── ⚙️ Settings (Tab)
+       └── 📋 Logs (TextArea)
+```
+
+---
+
+## 🔍 Cómo Ver los Logs en la UI
+
+### Paso 1: Abre BIMtegration Copilot en Revit
+- Revit → Add-ins → BIMtegration Copilot
+
+### Paso 2: Ve a la pestaña **Settings**
+- Busca el botón/pestaña "⚙️ Settings" o "Configuración"
+
+### Paso 3: Encuentra la sección **Logs**
+```
+┌─────────────────────────────────┐
+│  📋 Debug Logs                  │
+├─────────────────────────────────┤
+│ [14:23:45.200] [BIMLoginWindow] │
+│ ✅ Login exitoso - Usuario: ... │
+│ [14:23:45.145] [Premium]        │
+│ ✓ Cache HIT para Genehmigungen  │
+│ [14:23:45.156] [Premium]        │
+│ Descargado desde URL...         │
+│                                 │
+│ (últimas 1000 líneas)           │
+└─────────────────────────────────┘
+```
+
+### Paso 4: Lee los logs
+- El archivo se actualiza automáticamente
+- Los logs más recientes aparecen abajo
+- Se almacenan las últimas **1000 líneas**
+
+---
+
+## 💻 Cómo Agregar Logs en el Código
+
+### Opción 1: Usar `LogToFile()` en BIMLoginWindow.cs
+
+Si estás en `BIMLoginWindow.cs`, puedes usar directamente:
+
+```csharp
+LogToFile($"[MiClase] Mi mensaje de debug");
+```
+
+**Ejemplo:**
+```csharp
+private void MiFunction()
+{
+    LogToFile("[MiClase.MiFunction] Iniciando proceso...");
+    
+    try
+    {
+        var resultado = HacerAlgo();
+        LogToFile($"[MiClase.MiFunction] ✅ Éxito: {resultado}");
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[MiClase.MiFunction] ❌ Error: {ex.Message}");
+    }
+}
+```
+
+---
+
+### Opción 2: Crear tu propia función LogToFile
+
+Si necesitas logs en otras clases (como `PremiumButtonsCacheManager.cs`, `BIMAuthService.cs`, etc.), crea una función similar:
+
+```csharp
+private static void LogToFile(string message)
+{
+    try
+    {
+        string logDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "RoslynCopilot"
+        );
+        Directory.CreateDirectory(logDir);
+
+        string logFile = Path.Combine(logDir, "premium-buttons-debug.log");
+        string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+        File.AppendAllText(logFile, $"[{timestamp}] {message}\n");
+        
+        System.Diagnostics.Debug.WriteLine(message);
+    }
+    catch { /* Ignorar errores de logging */ }
+}
+```
+
+**Cópiala en la clase donde necesites usar logs.**
+
+---
+
+## 📊 Formato de Logs Recomendado
+
+### Estructura básica:
+```
+[timestamp] [ClassName.MethodName] mensaje
+```
+
+### Patrones útiles:
+
+#### ✅ Éxito:
+```csharp
+LogToFile($"[BIMLoginWindow] ✅ Login exitoso - Usuario: {usuario}");
+LogToFile($"[Premium] ✓ Descarga completada: {count} scripts");
+```
+
+#### ❌ Error:
+```csharp
+LogToFile($"[BIMAuthService] ❌ Autenticación falló: {ex.Message}");
+LogToFile($"[Premium] Error: {ex.GetType().Name} - {ex.Message}");
+```
+
+#### ⚠️ Advertencia:
+```csharp
+LogToFile($"[Premium] ⚠️ Reintentos agotados para: {buttonName}");
+LogToFile($"[Cache] ⚠️ Archivo no encontrado en caché");
+```
+
+#### ℹ️ Información:
+```csharp
+LogToFile($"[Premium] Iniciando descarga desde: {url}");
+LogToFile($"[ScriptPanel] ℹ️ Se detectaron {count} botones premium");
+```
+
+#### 📊 Datos:
+```csharp
+LogToFile($"[Premium] JSON Preview: {json.Substring(0, 200)}...");
+LogToFile($"[Premium] Code length: {script?.Code?.Length ?? 0} caracteres");
+```
+
+---
+
+## 🎨 Usando Emojis para Mejor Visualización
+
+### Recomendados:
+- ✅ `✅` - Operación exitosa
+- ❌ `❌` - Error / Fallo
+- ⚠️ `⚠️` - Advertencia / Precaución
+- ℹ️ `ℹ️` - Información
+- 📁 `📁` - Archivos
+- 🔍 `🔍` - Búsqueda / Análisis
+- 📊 `📊` - Datos / Estadísticas
+- 🔄 `🔄` - Proceso / Iteración
+- 💾 `💾` - Guardado
+- 🚀 `🚀` - Inicio / Lanzamiento
+- ⏳ `⏳` - En progreso / Esperando
+
+---
+
+## 📝 Ejemplos Prácticos
+
+### Ejemplo 1: Logging en Descargas de Premium Buttons
+
+```csharp
+// En PremiumButtonsCacheManager.cs
+private static async Task<ScriptDefinition> DownloadFromUrlAsync(string url)
+{
+    LogToFile($"[Premium] ⏳ Iniciando descarga desde: {url}");
+    
+    try
+    {
+        using (var client = new HttpClient())
+        {
+            var json = await client.GetStringAsync(url);
+            LogToFile($"[Premium] ✅ Descarga completada ({json.Length} bytes)");
+            
+            var script = JsonConvert.DeserializeObject<ScriptDefinition>(json);
+            LogToFile($"[Premium] 📊 Script: {script.Name}, Código: {script.Code?.Length ?? 0} chars");
+            
+            return script;
+        }
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[Premium] ❌ Error en descarga: {ex.GetType().Name} - {ex.Message}");
+        throw;
+    }
+}
+```
+
+### Ejemplo 2: Logging en Autenticación
+
+```csharp
+// En BIMAuthService.cs
+public async Task<LoginResult> LoginAsync(string usuario, string clave)
+{
+    LogToFile($"[BIMAuthService] ⏳ Intentando login para: {usuario}");
+    
+    try
+    {
+        var response = await client.PostAsync(AUTH_SERVER_URL, content);
+        var responseBody = await response.Content.ReadAsStringAsync();
+        
+        LogToFile($"[BIMAuthService] ✅ Respuesta recibida: {responseBody.Length} bytes");
+        
+        var jObject = JObject.Parse(responseBody);
+        bool ok = jObject["ok"]?.Value<bool>() ?? false;
+        
+        if (ok)
+        {
+            LogToFile($"[BIMAuthService] ✅ Login exitoso - Usuario: {usuario}");
+            return new LoginResult { Success = true };
+        }
+        else
+        {
+            LogToFile($"[BIMAuthService] ❌ Credenciales inválidas");
+            return new LoginResult { Success = false };
+        }
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[BIMAuthService] ❌ Excepción: {ex.GetType().Name} - {ex.Message}");
+        throw;
+    }
+}
+```
+
+### Ejemplo 3: Logging en Ejecución de Scripts
+
+```csharp
+// En ScriptPanel.xaml.cs
+private async Task ExecuteScript(ScriptDefinition script)
+{
+    LogToFile($"[ScriptPanel] ⏳ Ejecutando script: {script.Name}");
+    
+    try
+    {
+        var result = await ExecuteRoslynScript(script.Code);
+        LogToFile($"[ScriptPanel] ✅ Script ejecutado - Resultado: {result}");
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[ScriptPanel] ❌ Error ejecutando {script.Name}: {ex.Message}");
+    }
+}
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### P: ¿Dónde está el archivo de log?
+**R:** En `C:\Users\[USERNAME]\AppData\Roaming\RoslynCopilot\premium-buttons-debug.log`
+
+### P: ¿Por qué no veo logs en la UI?
+**R:** 
+1. Abre la pestaña **Settings** en BIMtegration
+2. Asegúrate de que has usado al menos una vez el login o premium buttons
+3. El archivo de log se crea la primera vez que se ejecuta `LogToFile()`
+
+### P: ¿Se borran los logs automáticamente?
+**R:** No. El archivo crece indefinidamente. Si es muy grande, puedes:
+- Borrarlo manualmente
+- O modificar el código para rotar logs (máx 1000 líneas)
+
+### P: ¿Cómo agrego logs a mi script personalizado?
+**R:** Los scripts personalizados (en "Crear Script") se ejecutan vía Roslyn. Para loguear desde un script, necesitarías:
+1. Exponer la función `LogToFile()` como variable global
+2. O registrar logs post-ejecución en la función que llama
+
+---
+
+## 📚 Variables Disponibles en Logs
+
+Cuando escribes logs, tienes acceso a:
+
+```csharp
+// Información del timestamp
+DateTime.Now.ToString("HH:mm:ss.fff")  // [14:23:45.200]
+
+// Información del contexto
+nameof(MiClase)                        // "MiClase"
+GetType().Name                         // "MiClase"
+
+// Información del error
+ex.GetType().Name                      // "HttpRequestException"
+ex.Message                             // "The connection was reset"
+ex.StackTrace                          // Stack trace completo
+ex.InnerException?.Message             // Excepciones anidadas
+```
+
+---
+
+## 🚀 Best Practices
+
+✅ **HACER:**
+- Loguear al inicio de funciones importantes
+- Incluir valores relevantes: nombres, URLs, tamaños
+- Usar emojis para categorizar tipos de eventos
+- Loguear errores con el tipo de excepción
+
+❌ **NO HACER:**
+- Loguear datos sensibles (contraseñas, tokens)
+- Crear logs en loops (pueden saturar el archivo)
+- Loguear objetos muy grandes sin limitar
+- Ignorar excepciones en `catch` sin loguear
+
+---
+
+## 📄 Archivo de Log Ejemplo
+
+```
+[14:23:45.200] [BIMLoginWindow] ⏳ Intentando login para: juan@empresa.com
+[14:23:45.215] [BIMAuthService] ⏳ Enviando credenciales a servidor...
+[14:23:45.450] [BIMAuthService] ✅ Respuesta recibida: 2847 bytes
+[14:23:45.451] [BIMAuthService] 📊 Plan detectado: PREMIUM
+[14:23:45.452] [BIMLoginWindow] ✅ Login exitoso - Usuario: juan@empresa.com
+[14:23:45.453] [BIMLoginWindow] Plan: PREMIUM
+[14:23:45.454] [BIMLoginWindow] Botones premium recibidos: 4
+[14:23:45.455] [BIMLoginWindow]   - Genehmigungen (Empresa: METRIKA 360)
+[14:23:45.456] [BIMLoginWindow]   - Elemente Nummerieren (Empresa: METRIKA 360)
+[14:23:45.500] [PremiumButtonsCacheManager] ⏳ Iniciando descarga de 4 botones premium
+[14:23:45.501] [Premium] ⏳ Procesando botón: Genehmigungen (ID: btn_001)
+[14:23:45.502] [Premium] Cache MISS - iniciando descarga
+[14:23:45.750] [Premium] ✅ Descarga completada (128567 bytes)
+[14:23:45.751] [Premium] ✓ Estructura envuelta detectada y deserializada
+[14:23:45.752] [Premium] 📊 Script: Genehmigungen, Código: 45823 chars
+[14:23:46.100] [PremiumButtonsCacheManager] ✅ Descarga completada: 4 exitosas, 0 con error
+[14:23:50.000] [ScriptPanel] ⏳ Ejecutando script: Genehmigungen
+[14:23:50.100] [ScriptPanel] ✅ Script ejecutado - Resultado: ✔ Script sent
+```
+
+---
+
+## 🎓 Resumen Rápido
+
+| Necesito... | Usa... | Ejemplo |
+|------------|--------|---------|
+| Loguear éxito | `✅` | `LogToFile($"[Clase] ✅ Operación completada");` |
+| Loguear error | `❌` | `LogToFile($"[Clase] ❌ Error: {ex.Message}");` |
+| Loguear progreso | `⏳` | `LogToFile($"[Clase] ⏳ Procesando...");` |
+| Loguear datos | `📊` | `LogToFile($"[Clase] 📊 Total: {count} items");` |
+| Loguear advertencia | `⚠️` | `LogToFile($"[Clase] ⚠️ Precaución: {msg}");` |
+
+---
+
+**¡Ahora tienes todo lo que necesitas para debuggear BIMtegration Copilot! 🎯**
+
+
+# 🔧 Guía Técnica - Integración de LogToFile en Clases BIMtegration
+
+## 📋 Resumen de Clases que Usan Logs
+
+| Clase | Archivo | Logs Actuales | Necesita Función |
+|-------|---------|---------------|------------------|
+| `BIMLoginWindow` | `BIMLoginWindow.cs` | ✅ Sí (tiene `LogToFile`) | ❌ No |
+| `PremiumButtonsCacheManager` | `PremiumButtonsCacheManager.cs` | ✅ Sí | ❌ No |
+| `BIMAuthService` | `BIMAuthService.cs` | ✅ Sí | ❌ No |
+| `ScriptPanel` | `ScriptPanel.xaml.cs` | ⚠️ Parcial | ✅ Necesita |
+
+---
+
+## 🎯 Paso a Paso: Agregar LogToFile a Cualquier Clase
+
+### Paso 1: Copia la Función
+
+Agrega esta función **al final de tu clase** (antes del cierre de llaves):
+
+```csharp
+/// <summary>
+/// Registra un mensaje en el archivo de debug log
+/// </summary>
+private static void LogToFile(string message)
+{
+    try
+    {
+        string logDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "RoslynCopilot"
+        );
+        Directory.CreateDirectory(logDir);
+
+        string logFile = Path.Combine(logDir, "premium-buttons-debug.log");
+        string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+        File.AppendAllText(logFile, $"[{timestamp}] {message}\n");
+        
+        System.Diagnostics.Debug.WriteLine(message);
+    }
+    catch { /* Ignorar errores de logging */ }
+}
+```
+
+### Paso 2: Usa LogToFile en tu Código
+
+Ahora puedes llamar a `LogToFile()` en cualquier método de la clase:
+
+```csharp
+public void MiMetodo()
+{
+    LogToFile($"[MiClase.MiMetodo] Iniciando...");
+    
+    try
+    {
+        // Tu código aquí
+        LogToFile($"[MiClase.MiMetodo] ✅ Éxito");
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[MiClase.MiMetodo] ❌ Error: {ex.Message}");
+    }
+}
+```
+
+### Paso 3: Visualiza en Settings
+
+- Abre BIMtegration Copilot
+- Ve a **Settings** → **Logs**
+- Verás los logs en tiempo real
+
+---
+
+## 📍 Ubicaciones Recomendadas para Agregar Logs
+
+### 1. En BIMLoginWindow.cs ✅ (YA HECHO)
+
+```csharp
+private async void LoginButton_Click(object sender, RoutedEventArgs e)
+{
+    LogToFile($"[BIMLoginWindow] ⏳ Iniciando login...");
+    // ... resto del código
+    LogToFile($"[BIMLoginWindow] ✅ Login completado");
+}
+```
+
+### 2. En ScriptPanel.xaml.cs ⚠️ (AGREGAR)
+
+**Ubicación:** Método `ExecuteScript()` - línea 1757
+
+```csharp
+private async Task ExecuteScript(ScriptDefinition script)
+{
+    LogToFile($"[ScriptPanel] ⏳ Ejecutando: {script.Name}");
+    
+    try
+    {
+        var result = await ExecuteRoslynScript(script.Code);
+        LogToFile($"[ScriptPanel] ✅ {script.Name} completado");
+    }
+    catch (Exception ex)
+    {
+        LogToFile($"[ScriptPanel] ❌ Error en {script.Name}: {ex.Message}");
+    }
+}
+```
+
+### 3. En BIMAuthService.cs ✅ (YA HECHO)
+
+**Ubicación:** Método `LoginAsync()` - línea 45
+
+```csharp
+public async Task<LoginResult> LoginAsync(string usuario, string clave)
+{
+    LogToFile($"[BIMAuthService] ⏳ Login para: {usuario}");
+    // ... código
+}
+```
+
+### 4. En PremiumButtonsCacheManager.cs ✅ (YA HECHO)
+
+**Ubicación:** Método `DownloadFromUrlAsync()` - línea 280
+
+```csharp
+private static async Task<ScriptDefinition> DownloadFromUrlAsync(string url)
+{
+    LogToFile($"[Premium] ⏳ Descargando: {url}");
+    // ... código
+}
+```
+
+---
+
+## 🎨 Patrones de Logging por Módulo
+
+### Patrón: Premium Buttons
+
+```csharp
+// Inicio
+LogToFile($"[Premium] ⏳ Iniciando descarga de {count} botones");
+
+// Progreso
+LogToFile($"[Premium] ℹ️ Procesando botón {i}/{total}: {buttonName}");
+
+// Éxito
+LogToFile($"[Premium] ✅ Descarga completada: {successCount} exitosas");
+
+// Error
+LogToFile($"[Premium] ❌ Error en {buttonName}: {ex.Message}");
+```
+
+### Patrón: Autenticación
+
+```csharp
+// Intento
+LogToFile($"[BIMAuthService] ⏳ Enviando credenciales a {url}");
+
+// Respuesta
+LogToFile($"[BIMAuthService] ✅ Respuesta: {response.StatusCode}");
+
+// Datos
+LogToFile($"[BIMAuthService] 📊 Usuario: {usuario}, Plan: {plan}");
+
+// Error
+LogToFile($"[BIMAuthService] ❌ Autenticación fallida: {error}");
+```
+
+### Patrón: Ejecución de Scripts
+
+```csharp
+// Inicio
+LogToFile($"[ScriptPanel] ⏳ Ejecutando script: {script.Name}");
+
+// Etapas
+LogToFile($"[ScriptPanel] 📊 Código: {script.Code.Length} caracteres");
+LogToFile($"[ScriptPanel] 🔄 Compilando con Roslyn...");
+
+// Resultado
+LogToFile($"[ScriptPanel] ✅ Script completado. Resultado: {result}");
+
+// Error
+LogToFile($"[ScriptPanel] ❌ Error en línea {lineNumber}: {errorMsg}");
+```
+
+---
+
+## 🔍 Debugging Común
+
+### Caso 1: Problema con Premium Buttons No Descargables
+
+```csharp
+// En DownloadPremiumButtonsAsync()
+LogToFile($"[PremiumButtonsCacheManager] 🔍 Verificando caché para: {buttonId}");
+LogToFile($"[PremiumButtonsCacheManager] 📁 Ruta de caché: {cachePath}");
+LogToFile($"[PremiumButtonsCacheManager] 📊 Archivos en caché: {cacheFiles.Length}");
+
+if (cached)
+{
+    LogToFile($"[PremiumButtonsCacheManager] ✅ Cargado desde caché");
+}
+else
+{
+    LogToFile($"[PremiumButtonsCacheManager] 🌐 Descargando desde: {url}");
+}
+```
+
+### Caso 2: Problema con Script que No Ejecuta
+
+```csharp
+// En ExecuteScript()
+LogToFile($"[ScriptPanel] 🔍 Validando script: {script.Name}");
+LogToFile($"[ScriptPanel] ✓ Código presente: {!string.IsNullOrEmpty(script.Code)}");
+LogToFile($"[ScriptPanel] ✓ UIApplication disponible: {uiApp != null}");
+LogToFile($"[ScriptPanel] ✓ Documento abierto: {uiApp?.ActiveUIDocument?.Document != null}");
+
+if (uiApp == null)
+{
+    LogToFile($"[ScriptPanel] ❌ UIApplication no disponible");
+    return;
+}
+
+LogToFile($"[ScriptPanel] 🚀 Iniciando ejecución de Roslyn");
+```
+
+### Caso 3: Problema con Login Fallido
+
+```csharp
+// En LoginAsync()
+LogToFile($"[BIMAuthService] 🔍 Preparando payload...");
+LogToFile($"[BIMAuthService] 📊 Usuario: {usuario}");
+LogToFile($"[BIMAuthService] 📊 URL del servidor: {AUTH_SERVER_URL}");
+
+var response = await client.PostAsync(AUTH_SERVER_URL, content);
+LogToFile($"[BIMAuthService] 📊 Status Code: {response.StatusCode}");
+LogToFile($"[BIMAuthService] 📊 Respuesta length: {responseBody.Length}");
+
+if (response.StatusCode != System.Net.HttpStatusCode.OK)
+{
+    LogToFile($"[BIMAuthService] ❌ Servidor retornó: {response.StatusCode}");
+}
+```
+
+---
+
+## 📊 Ejemplos de Salida en Settings
+
+### Sesión Exitosa:
+```
+[14:23:45.200] [BIMLoginWindow] ⏳ Intentando login para: usuario@empresa.com
+[14:23:45.450] [BIMAuthService] ✅ Respuesta: OK
+[14:23:45.451] [BIMAuthService] 📊 Plan: PREMIUM
+[14:23:45.500] [PremiumButtonsCacheManager] ⏳ Iniciando descarga de 4 botones
+[14:23:46.100] [PremiumButtonsCacheManager] ✅ Descarga completada: 4 exitosas
+```
+
+### Sesión con Errores:
+```
+[14:23:45.200] [BIMAuthService] ⏳ Enviando credenciales...
+[14:23:45.450] [BIMAuthService] 📊 Status Code: Unauthorized
+[14:23:45.451] [BIMAuthService] ❌ Error: 401 Unauthorized
+[14:23:45.500] [BIMLoginWindow] ❌ Login falló: Credenciales inválidas
+```
+
+---
+
+## 🚀 Checklist: Agregar Logs a una Nueva Clase
+
+- [ ] Copiar función `LogToFile()` al final de la clase
+- [ ] Agregar `using System.IO;` si no está presente
+- [ ] Agregar `using System.Diagnostics;` si usas `Debug.WriteLine`
+- [ ] Loguear inicio de métodos principales
+- [ ] Loguear valores importantes (URLs, ids, etc.)
+- [ ] Loguear errores con `ex.Message` y `ex.GetType().Name`
+- [ ] Usar emojis para categorizar
+- [ ] Probar en Settings → Logs
+- [ ] Verificar que aparezcan en `premium-buttons-debug.log`
+
+---
+
+## 💡 Tips Profesionales
+
+### Tip 1: Loguea Cambios de Estado
+```csharp
+LogToFile($"[ScriptPanel] Estado anterior: {currentState} → Nuevo: {newState}");
+```
+
+### Tip 2: Loguea Tiempos de Ejecución
+```csharp
+var start = DateTime.Now;
+// ... código
+var duration = (DateTime.Now - start).TotalMilliseconds;
+LogToFile($"[Premium] ✅ Descarga completada en {duration:F0}ms");
+```
+
+### Tip 3: Loguea Estadísticas
+```csharp
+LogToFile($"[PremiumButtons] 📊 Estadísticas: Total={total}, Exitosos={success}, Fallos={failed}");
+```
+
+### Tip 4: Loguea Contexto Completo
+```csharp
+LogToFile($"[ScriptPanel] Contexto: Usuario={usuario}, Script={script}, Versión={version}");
+```
+
+### Tip 5: Loguea Puntos de Decisión
+```csharp
+if (condition)
+{
+    LogToFile($"[MyClass] 🔀 Rama tomada: Opción A");
+    // ... código
+}
+else
+{
+    LogToFile($"[MyClass] 🔀 Rama tomada: Opción B");
+    // ... código
+}
+```
+
+---
+
+## 🔗 Referencias Rápidas
+
+**Función completa:**
+```csharp
+private static void LogToFile(string message)
+{
+    try
+    {
+        string logDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "RoslynCopilot"
+        );
+        Directory.CreateDirectory(logDir);
+        string logFile = Path.Combine(logDir, "premium-buttons-debug.log");
+        string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+        File.AppendAllText(logFile, $"[{timestamp}] {message}\n");
+        System.Diagnostics.Debug.WriteLine(message);
+    }
+    catch { }
+}
+```
+
+**Llamada simple:**
+```csharp
+LogToFile($"[MiClase] ✅ Mensaje aquí");
+```
+
+**Llamada con variables:**
+```csharp
+LogToFile($"[MiClase] 📊 Usuario: {usuario}, Resultado: {resultado}");
+```
+
+**Llamada con excepciones:**
+```csharp
+LogToFile($"[MiClase] ❌ {ex.GetType().Name}: {ex.Message}");
+```
+
+---
+
+**¡Ahora puedes debuggear cualquier módulo de BIMtegration Copilot! 🎯**
+REGLA DE ORO: PERSISTENCIA Y UI (SHOWDIALOG)
+⚠️ IMPORTANTE: Si tu script muestra una ventana modal (form.ShowDialog()), NO uses transacciones manuales (new Transaction) ni SubTransaction directamente en el flujo principal, porque Revit revertirá los cambios (Rollback) al cerrar la ventana.
+
+Debes usar SIEMPRE el siguiente patrón de "Evento Externo por Reflexión":
+
+C#
+
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using WF = System.Windows.Forms;
+using System;
+
+// 1. OBTENER HANDLER POR REFLEXIÓN
+var handlerObj = (object)externalEventHandler;
+var actionProp = handlerObj.GetType().GetProperty("ActionToExecute");
+if (actionProp == null) return "❌ Error: ActionToExecute no encontrado.";
+
+// 2. DEFINIR LA ACCIÓN (Toda tu lógica va aquí dentro)
+Action<UIApplication> aktion = (uiapp) =>
+{
+    var doc = uiapp?.ActiveUIDocument?.Document;
+    var uidoc = uiapp?.ActiveUIDocument;
+
+    try
+    {
+        // A. MOSTRAR UI
+        var form = new MiFormulario(doc);
+        if (form.ShowDialog() != WF.DialogResult.OK) return;
+
+        // B. EJECUTAR LÓGICA (Revit gestiona la transacción aquí de forma segura)
+        // ... tu código de creación/modificación ...
+        
+        TaskDialog.Show("Éxito", "Elementos creados correctamente.");
+    }
+    catch (Exception ex)
+    {
+        TaskDialog.Show("Error", ex.Message);
+    }
+};
+
+// 3. ASIGNAR Y DISPARAR
+actionProp.SetValue(handlerObj, aktion);
+var raiseMethod = externalEvent.GetType().GetMethod("Raise");
+raiseMethod.Invoke(externalEvent, null);
+
+return "✅ Comando activado correctamente.";
+
+// ... Clases del Formulario abajo ...
+3. ESTRUCTURA PARA SCRIPTS SIMPLES (SIN UI)
+Si el script NO abre ventanas y es una ejecución directa, puedes usar la estructura simple (la transacción es automática):
+
+## 20. ACCESO AL TOKEN DE AUTENTICACIÓN EN SCRIPTS
+
+**Guardar y acceder al token desde scripts Copilot:**
+
+Los tokens de autenticación se almacenan de forma encriptada en el disco usando DPAPI. Para acceder al token desde tus scripts, debes interactuar con el servicio de autenticación disponible en el contexto.
+
+### Obtener el token actual
+```csharp
+// El token está disponible a través del servicio de autenticación
+// Ruta: %APPDATA%\RoslynCopilot\bim_auth.dat (encriptado)
+
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using Newtonsoft.Json;
+
+// Función auxiliar para cargar el token desde el almacenamiento
+string GetStoredToken()
+{
+    string tokenFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "RoslynCopilot",
+        "bim_auth.dat"
+    );
+    
+    if (!File.Exists(tokenFilePath))
+        return null;
+
+    try
+    {
+        byte[] entropy = Encoding.UTF8.GetBytes("BIMtegration2025");
+        var encryptedData = File.ReadAllBytes(tokenFilePath);
+        var jsonBytes = ProtectedData.Unprotect(encryptedData, entropy, DataProtectionScope.CurrentUser);
+        var json = Encoding.UTF8.GetString(jsonBytes);
+        
+        dynamic tokenData = JsonConvert.DeserializeObject(json);
+        return tokenData.Token;
+    }
+    catch
+    {
+        return null;
+    }
+}
+
+// Usar el token en tu script
+var token = GetStoredToken();
+if (string.IsNullOrEmpty(token))
+{
+    return "❌ No hay token guardado. Por favor, auténtica primero.";
+}
+
+// Ahora puedes usar el token en peticiones HTTP
+using (var client = new HttpClient())
+{
+    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+    var response = await client.GetAsync("https://api.bimtegration.com/datos");
+    var datos = await response.Content.ReadAsStringAsync();
+    return $"✅ Datos obtenidos: {datos}";
+}
+```
+
+### Guardar datos asociados al token
+```csharp
+// Obtener información del usuario autenticado
+string GetUserInfo()
+{
+    string tokenFilePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "RoslynCopilot",
+        "bim_auth.dat"
+    );
+    
+    if (!File.Exists(tokenFilePath))
+        return "No autenticado";
+
+    try
+    {
+        byte[] entropy = Encoding.UTF8.GetBytes("BIMtegration2025");
+        var encryptedData = File.ReadAllBytes(tokenFilePath);
+        var jsonBytes = ProtectedData.Unprotect(encryptedData, entropy, DataProtectionScope.CurrentUser);
+        var json = Encoding.UTF8.GetString(jsonBytes);
+        
+        dynamic tokenData = JsonConvert.DeserializeObject(json);
+        return $"Usuario: {tokenData.Usuario}, Plan: {tokenData.Plan}";
+    }
+    catch
+    {
+        return "Error al leer datos de autenticación";
+    }
+}
+
+var userInfo = GetUserInfo();
+TaskDialog.Show("Info de Usuario", userInfo);
+return $"✅ {userInfo}";
+```
+
+### Validar token antes de usar recursos premium
+```csharp
+// Verificar si el token es válido antes de usar una función premium
+async Task<bool> IsTokenValid()
+{
+    var token = GetStoredToken();
+    if (string.IsNullOrEmpty(token))
+        return false;
+
+    const string AUTH_SERVER_URL = "https://script.google.com/macros/s/AKfycbwZ9Qki-FSQzRNi_gr_kAMl02Rck78YQ_-6xB3R9nQ8_kFmWpwpKY1DwU-sThpjj2IL/exec";
+    
+    try
+    {
+        using (var client = new HttpClient())
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
+            var payload = new { action = "validate", token = token };
+            var jsonPayload = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            
+            var response = await client.PostAsync(AUTH_SERVER_URL, content);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            dynamic validationResponse = JsonConvert.DeserializeObject(responseBody);
+            
+            return validationResponse?.ok == true;
+        }
+    }
+    catch
+    {
+        return true; // Fail-safe: asumir válido si hay error de red
+    }
+}
+
+// Usar antes de función premium
+if (!await IsTokenValid())
+{
+    return "❌ Token inválido o expirado. Por favor, auténtica nuevamente.";
+}
+
+// Proceder con función premium
+return "✅ Token validado. Procediendo...";
+```
+
+### ⚠️ Consideraciones Importantes
+
+1. **Encriptación**: El token está encriptado con DPAPI y solo puede ser leído por el usuario de Windows que lo creó
+2. **Ubicación segura**: Se almacena en `%APPDATA%\RoslynCopilot\bim_auth.dat`
+3. **Entropía fija**: La entropía es `"BIMtegration2025"` - **no cambiarla**
+4. **Validación periódica**: Revalidar tokens ocasionalmente para detectar expiración
+5. **Manejo de errores**: Si falla la desencriptación, el usuario necesita re-autenticarse
+
+---
+
+C#
+
+try {
+    // Lógica directa
+    var walls = new FilteredElementCollector(doc).OfClass(typeof(Wall)).ToList();
+    return $"✅ Procesados {walls.Count} muros.";
+} catch (Exception ex) {
+    return $"❌ Error: {ex.Message}";
+}
