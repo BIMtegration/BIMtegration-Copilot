@@ -279,7 +279,18 @@ namespace RoslynCopilotTest
 
         public Result OnShutdown(UIControlledApplication application)
         {
-            // Limpiar recursos si es necesario
+            // Limpiar la sesión de autenticación al cerrar Revit
+            try
+            {
+                var authService = new BIMAuthService();
+                authService.Logout();
+                System.Diagnostics.Debug.WriteLine("Sesión de BIMtegration limpiada al cerrar Revit");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error limpiando sesión al cerrar: {ex.Message}");
+            }
+            
             return Result.Succeeded;
         }
 
