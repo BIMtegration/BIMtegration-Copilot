@@ -356,28 +356,32 @@ namespace RoslynCopilotTest.Services
                         Plan = tokenData.Plan
                     };
 
-                    // Validar token con timeout (máx 5 segundos)
-                    // Si falla, limpiar para forzar nuevo login
+                    // Validar token en background (máx 10 segundos)
+                    // Si falla la validación o timeout, MANTENER el token (fail-safe)
+                    // Solo limpiar si el servidor responde explícitamente que es inválido
                     try
                     {
                         var validationTask = ValidateTokenAsync();
-                        if (!validationTask.Wait(TimeSpan.FromSeconds(5)))
+                        if (!validationTask.Wait(TimeSpan.FromSeconds(10)))
                         {
-                            // Timeout - considerar token inválido
-                            System.Diagnostics.Debug.WriteLine("Validación de token expirada (timeout), requiere re-login");
-                            ClearSavedToken();
+                            // Timeout - mantener token guardado (puede ser problema de red)
+                            System.Diagnostics.Debug.WriteLine("Validación de token en timeout, pero se mantiene la sesión guardada");
                         }
                         else if (!validationTask.Result)
                         {
-                            // Validación fallida explícitamente
-                            System.Diagnostics.Debug.WriteLine("Token guardado inválido, requiere re-login");
-                            // ClearSavedToken() ya fue llamado en ValidateTokenAsync
+                            // Validación fallida explícitamente - limpiar solo en este caso
+                            System.Diagnostics.Debug.WriteLine("Token guardado inválido según servidor, requiere re-login");
+                            ClearSavedToken();
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Token guardado validado correctamente");
                         }
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error validando token guardado: {ex.Message}, requiere re-login");
-                        ClearSavedToken();
+                        // Error de validación - mantener token (fail-safe)
+                        System.Diagnostics.Debug.WriteLine($"Error validando token en background: {ex.Message}, pero se mantiene la sesión");
                     }
                 }
             }
