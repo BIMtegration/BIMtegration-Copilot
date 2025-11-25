@@ -2641,8 +2641,8 @@ namespace RoslynCopilotTest.UI
                             LogPremium($"[Connect Handler] ⚠️ No hay botones premium para descargar");
                         }
                         
-                        MessageBox.Show($"✅ Bienvenido {user?.Usuario}!\n\nPlan: {user?.Plan ?? "Free"}", 
-                            "Login Exitoso", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show($"✅ Welcome {user?.Usuario}!\n\nPlan: {user?.Plan ?? "Free"}", 
+                            "Login Successful", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
                 else
