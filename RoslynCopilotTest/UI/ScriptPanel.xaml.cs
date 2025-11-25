@@ -3288,7 +3288,7 @@ namespace RoslynCopilotTest.UI
 
             var descriptionBlock = new TextBlock
             {
-                Text = "Esta funcionalidad está en desarrollo.\n\nProximamente: Modelado avanzado con IA para Revit.",
+                Text = "This functionality is under development.\n\nComing soon: Advanced AI modeling for Revit.",
                 FontSize = 12,
                 Margin = new Thickness(0, 0, 0, 15),
                 Foreground = new SolidColorBrush(WpfColor.FromRgb(200, 200, 200)),
@@ -3299,7 +3299,7 @@ namespace RoslynCopilotTest.UI
 
             var statusBlock = new TextBlock
             {
-                Text = "⏳ Disponible cuando se complete el desarrollo.",
+                Text = "⏳ Available when development is complete.",
                 FontSize = 11,
                 Foreground = new SolidColorBrush(WpfColor.FromRgb(150, 150, 150)),
                 FontStyle = FontStyles.Italic
