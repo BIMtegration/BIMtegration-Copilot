@@ -2538,9 +2538,9 @@ namespace RoslynCopilotTest.UI
             
             // Bloquear/desbloquear botones en Advanced tab
             if (_addScriptButton != null) _addScriptButton.IsEnabled = isEnabled;
-            if (_openFileButton != null) _openFileButton.IsEnabled = isEnabled;
+            if (_openFileButton != null) _openFileButton.IsEnabled = true;  // Always available
             if (_exportButton != null) _exportButton.IsEnabled = isEnabled;
-            if (_historyButton != null) _historyButton.IsEnabled = isEnabled;
+            if (_historyButton != null) _historyButton.IsEnabled = true;    // Always available
             
             // Bloquear/desbloquear tabs completos
             if (_advancedTab != null) _advancedTab.IsEnabled = isEnabled;
@@ -2805,7 +2805,7 @@ namespace RoslynCopilotTest.UI
             // Título
             var titleText = new TextBlock
             {
-                Text = "🔒 BOTONES PREMIUM",
+                Text = "🔒 PREMIUM BUTTONS",
                 FontWeight = FontWeights.Bold,
                 FontSize = 12,
                 Foreground = new SolidColorBrush(WpfColor.FromRgb(0, 120, 212)),
@@ -3299,10 +3299,11 @@ namespace RoslynCopilotTest.UI
 
             var statusBlock = new TextBlock
             {
-                Text = "⏳ Available when development is complete.",
+                Text = "⏳ Complete soon.",
                 FontSize = 11,
                 Foreground = new SolidColorBrush(WpfColor.FromRgb(150, 150, 150)),
-                FontStyle = FontStyles.Italic
+                FontStyle = FontStyles.Italic,
+                TextWrapping = TextWrapping.Wrap
             };
             placeholderStack.Children.Add(statusBlock);
 
