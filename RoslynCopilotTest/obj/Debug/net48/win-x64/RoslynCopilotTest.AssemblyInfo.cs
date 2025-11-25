@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CodeAssistantPro")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("2.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+200dbea9dddb3e0563f9425089f1eb07eddcda3d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("2.0.0+a42c5a70eeb5bf2f977da4421146eb980eb74cdc")]
 [assembly: System.Reflection.AssemblyProductAttribute("CodeAssistantPro")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CodeAssistantPro")]
 [assembly: System.Reflection.AssemblyVersionAttribute("2.0.0.0")]

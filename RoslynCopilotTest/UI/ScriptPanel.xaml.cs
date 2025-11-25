@@ -509,7 +509,7 @@ namespace RoslynCopilotTest.UI
             // Título de funciones de gestión
             var managementTitle = new TextBlock
             {
-                Text = "⚙️ FUNCIONES DE GESTIÓN",
+                Text = "⚙️ MANAGEMENT FUNCTIONS",
                 FontWeight = FontWeights.Bold,
                 FontSize = 12,
                 Foreground = new SolidColorBrush(WpfColor.FromRgb(0, 120, 212)),
@@ -517,12 +517,12 @@ namespace RoslynCopilotTest.UI
             };
             advancedStack.Children.Add(managementTitle);
             
-            _addScriptButton = CreateStyledButton("➕ Nuevo Script", true);
+            _addScriptButton = CreateStyledButton("➕ New Script", true);
             _addScriptButton.Click += AddScriptButton_Click;
             _addScriptButton.Margin = new Thickness(0, 8, 0, 0);
 
-                // Botón para actualizar scripts existentes
-                _updateScriptButton = CreateStyledButton("🔄 Actualizar Script", true);
+                // Button to update existing scripts
+                _updateScriptButton = CreateStyledButton("🔄 Update Script", true);
                 _updateScriptButton.Click += UpdateScriptButton_Click;
                 _updateScriptButton.Margin = new Thickness(0, 8, 0, 0);
             
@@ -1152,13 +1152,13 @@ namespace RoslynCopilotTest.UI
                 if (_showOnlyFavorites)
                 {
                     _favoritesFilter.Background = new SolidColorBrush(WpfColor.FromRgb(255, 193, 7));
-                    _favoritesFilter.Content = "⭐ Mostrando favoritos";
+                    _favoritesFilter.Content = "⭐ Showing favorites";
                     _favoritesFilter.FontWeight = FontWeights.Bold;
                 }
                 else
                 {
                     _favoritesFilter.Background = new SolidColorBrush(WpfColor.FromRgb(255, 255, 255));
-                    _favoritesFilter.Content = "⭐ Mostrar solo favoritos";
+                    _favoritesFilter.Content = "⭐ Show favorites only";
                     _favoritesFilter.FontWeight = FontWeights.Normal;
                 }
             }
@@ -1237,7 +1237,7 @@ namespace RoslynCopilotTest.UI
             {
                 var emptyMessage = new TextBlock
                 {
-                    Text = "📝 No hay scripts disponibles.\n\nHaz clic en 'Nuevo Script' para crear uno.",
+                    Text = "📝 No scripts available.\n\nClick 'New Script' to create one.",
                     HorizontalAlignment = HorizontalAlignment.Center,
                     TextAlignment = TextAlignment.Center,
                     Margin = new Thickness(20),
@@ -1773,7 +1773,7 @@ namespace RoslynCopilotTest.UI
                 if (string.IsNullOrEmpty(script?.Code))
                 {
                     System.Diagnostics.Debug.WriteLine($"[ExecuteScript] ❌ ERROR: Script.Code está vacío para '{script?.Name}'");
-                    MessageBox.Show($"❌ Script '{script?.Name}' no tiene código. Code está vacío.", 
+                    MessageBox.Show($"❌ Script '{script?.Name}' has no code. Code is empty.", 
                                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -1789,34 +1789,34 @@ namespace RoslynCopilotTest.UI
                         uiApp = GetCurrentUIApplication();
                     }
                     
-                    // Si aún no está disponible, mostrar mensaje
+                    // If still not available, show message
                     if (uiApp == null)
                     {
-                        MessageBox.Show("🔧 Conexión con Revit necesaria\n\n" +
-                                       "Para usar los scripts, primero cierra y vuelve a abrir este panel:\n\n" +
+                        MessageBox.Show("🔧 Revit connection required\n\n" +
+                                       "To use the scripts, first close and reopen this panel:\n\n" +
                                        "1. Click the 'Hide BIMtegration' button on the Revit ribbon\n" +
                                        "2. Then click 'Show BIMtegration' to reopen the panel\n\n" +
-                                       "Esto establece la conexión. ¡Solo necesitas hacerlo una vez por sesión!", 
-                                       "Inicialización Requerida", 
+                                       "This establishes the connection. You only need to do it once per session!", 
+                                       "Initialization Required", 
                                        MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
                 }
 
-                // Verificar que hay un documento activo
+                // Verify that there is an active document
                 if (uiApp.ActiveUIDocument?.Document == null)
                 {
-                    MessageBox.Show("No hay ningún documento de Revit abierto.", "Error", 
+                    MessageBox.Show("No Revit document is open.", "Error", 
                                    MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Ejecutar script directamente - el TaskDialog dentro del script se ejecutará en el UI thread
-                System.Diagnostics.Debug.WriteLine($"[ExecuteScript] Llamando a ExecuteRoslynScript...");
+                // Execute script directly - the TaskDialog inside the script will run on the UI thread
+                System.Diagnostics.Debug.WriteLine($"[ExecuteScript] Calling ExecuteRoslynScript...");
                 var result = await ExecuteRoslynScript(script.Code);
-                resultMessage = result?.ToString() ?? "Ejecutado exitosamente";
+                resultMessage = result?.ToString() ?? "Executed successfully";
                 success = true;
-                System.Diagnostics.Debug.WriteLine($"[ExecuteScript] ✓ Script ejecutado exitosamente");
+                System.Diagnostics.Debug.WriteLine($"[ExecuteScript] ✓ Script executed successfully");
 
                 // Mostrar resultado
                 var resultDialog = new TaskDialog("Resultado del Script")
@@ -1878,7 +1878,7 @@ namespace RoslynCopilotTest.UI
                 if (string.IsNullOrEmpty(script?.Code))
                 {
                     System.Diagnostics.Debug.WriteLine($"[ExecuteScriptSilent] ❌ ERROR: Script.Code está vacío para '{script?.Name}'");
-                    MessageBox.Show($"❌ Script '{script?.Name}' no tiene código. Code está vacío.", 
+                    MessageBox.Show($"❌ Script '{script?.Name}' has no code. Code is empty.", 
                                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
@@ -1893,12 +1893,12 @@ namespace RoslynCopilotTest.UI
                     
                     if (uiApp == null)
                     {
-                        MessageBox.Show("🔧 Conexión con Revit necesaria\n\n" +
-                                       "Para usar los scripts, primero cierra y vuelve a abrir este panel:\n\n" +
+                        MessageBox.Show("🔧 Revit connection required\n\n" +
+                                       "To use the scripts, first close and reopen this panel:\n\n" +
                                        "1. Click the 'Hide BIMtegration' button on the Revit ribbon\n" +
                                        "2. Then click 'Show BIMtegration' to reopen the panel\n\n" +
-                                       "Esto establece la conexión. ¡Solo necesitas hacerlo una vez por sesión!", 
-                                       "Inicialización Requerida", 
+                                       "This establishes the connection. You only need to do it once per session!", 
+                                       "Initialization Required", 
                                        MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
@@ -1906,17 +1906,17 @@ namespace RoslynCopilotTest.UI
 
                 if (uiApp.ActiveUIDocument?.Document == null)
                 {
-                    MessageBox.Show("No hay ningún documento de Revit abierto.", "Error", 
+                    MessageBox.Show("No Revit document is open.", "Error", 
                                    MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Ejecutar script sin mostrar diálogo final
-                System.Diagnostics.Debug.WriteLine($"[ExecuteScriptSilent] Llamando a ExecuteRoslynScript...");
+                // Execute script without showing final dialog
+                System.Diagnostics.Debug.WriteLine($"[ExecuteScriptSilent] Calling ExecuteRoslynScript...");
                 var result = await ExecuteRoslynScript(script.Code);
-                resultMessage = result?.ToString() ?? "Ejecutado exitosamente";
+                resultMessage = result?.ToString() ?? "Executed successfully";
                 success = true;
-                System.Diagnostics.Debug.WriteLine($"[ExecuteScriptSilent] ✓ Script ejecutado exitosamente sin diálogo final");
+                System.Diagnostics.Debug.WriteLine($"[ExecuteScriptSilent] ✓ Script executed successfully without final dialog");
             }
             catch (Exception ex)
             {

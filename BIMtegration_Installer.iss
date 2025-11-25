@@ -3,7 +3,7 @@
 ; Última actualización: Octubre 2025
 
 #define MyAppName "BIMtegration Copilot"
-#define MyAppVersion "1.0.4"
+#define MyAppVersion "1.0.5"
 #define MyAppPublisher "BIMtegration"
 #define MyAppURL "https://www.bimtegration.com"
 #define MyAppExeName "CodeAssistantPro.dll"
