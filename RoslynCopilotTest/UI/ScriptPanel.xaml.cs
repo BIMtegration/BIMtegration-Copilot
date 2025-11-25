@@ -2649,8 +2649,8 @@ namespace RoslynCopilotTest.UI
                 {
                     // Confirmar logout
                     var result = MessageBox.Show(
-                        "¿Deseas cerrar sesión en BIMtegration?\n\nSe bloquearán las funciones premium.",
-                        "Confirmar Logout",
+                        "Do you want to logout from BIMtegration?\n\nPremium features will be blocked.",
+                        "Logout Confirmation",
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Question);
                     
@@ -2662,7 +2662,7 @@ namespace RoslynCopilotTest.UI
                         _premiumButtonStatus.Clear();
                         UpdateCustomStatus(null, "Not connected");
                         UpdateCustomDependentButtons();
-                        MessageBox.Show("✅ Sesión cerrada correctamente", "Logout", 
+                        MessageBox.Show("✅ Session closed successfully", "Logout", 
                             MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }

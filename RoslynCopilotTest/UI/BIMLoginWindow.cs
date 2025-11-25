@@ -96,10 +96,10 @@ namespace RoslynCopilotTest.UI
         {
             var panel = new StackPanel { Margin = new Thickness(0, 0, 0, 10) };
 
-            // Usuario
+            // Username
             var usuarioLabel = new Label
             {
-                Content = "Usuario:",
+                Content = "Username:",
                 Foreground = Brushes.White,
                 FontSize = 12
             };
@@ -122,10 +122,10 @@ namespace RoslynCopilotTest.UI
             };
             panel.Children.Add(_usuarioTextBox);
 
-            // Contraseña
+            // Password
             var claveLabel = new Label
             {
-                Content = "Contraseña:",
+                Content = "Password:",
                 Foreground = Brushes.White,
                 FontSize = 12
             };
@@ -173,7 +173,7 @@ namespace RoslynCopilotTest.UI
             // Botón Cancelar
             _cancelButton = new WpfButton
             {
-                Content = "Cancelar",
+                Content = "Cancel",
                 Width = 100,
                 Height = 35,
                 Margin = new Thickness(0, 0, 10, 0),
@@ -195,7 +195,7 @@ namespace RoslynCopilotTest.UI
             // Botón Login
             _loginButton = new WpfButton
             {
-                Content = "🔓 Iniciar Sesión",
+                Content = "🔓 Login",
                 Width = 150,
                 Height = 35,
                 Background = new SolidColorBrush(MediaColor.FromRgb(0, 120, 212)),
@@ -221,14 +221,14 @@ namespace RoslynCopilotTest.UI
             // Validar inputs
             if (string.IsNullOrEmpty(usuario))
             {
-                ShowStatus("⚠️ Por favor ingresa tu usuario", Brushes.Yellow);
+                ShowStatus("⚠️ Please enter your username", Brushes.Yellow);
                 _usuarioTextBox.Focus();
                 return;
             }
 
             if (string.IsNullOrEmpty(clave))
             {
-                ShowStatus("⚠️ Por favor ingresa tu contraseña", Brushes.Yellow);
+                ShowStatus("⚠️ Please enter your password", Brushes.Yellow);
                 _clavePasswordBox.Focus();
                 return;
             }
@@ -236,7 +236,7 @@ namespace RoslynCopilotTest.UI
             // Deshabilitar controles
             SetControlsEnabled(false);
             _progressBar.Visibility = Visibility.Visible;
-            ShowStatus("🔄 Autenticando...", Brushes.Cyan);
+            ShowStatus("🔄 Authenticating...", Brushes.Cyan);
 
             try
             {
@@ -244,7 +244,7 @@ namespace RoslynCopilotTest.UI
 
                 if (result.Success)
                 {
-                    ShowStatus("✅ Login exitoso!", Brushes.LightGreen);
+                    ShowStatus("✅ Login successful!", Brushes.LightGreen);
                     await System.Threading.Tasks.Task.Delay(500);
                     
                     LoginSuccessful = true;
