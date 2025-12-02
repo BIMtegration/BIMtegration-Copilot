@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RoslynCopilotTest.Models;
 
 namespace RoslynCopilotTest.Services
 {
@@ -157,6 +159,62 @@ namespace RoslynCopilotTest.Services
                         LogToFile($"[BIMAuthService.LoginAsync] ❌ Error extrayendo userData.Buttons: {ex.GetType().Name} - {ex.Message}");
                     }
 
+                    // Extraer configuración de datos de empresa (CompanyDataConfig)
+                    string companyDataConfig = null;
+                    try
+                    {
+                        var userDataObj = jObject["userData"];
+                        LogToFile($"[BIMAuthService.LoginAsync] 🔍 userData null? {userDataObj == null}");
+                        
+                        if (userDataObj != null)
+                        {
+                            LogToFile($"[BIMAuthService.LoginAsync] 🔍 userData keys: {string.Join(", ", ((JObject)userDataObj).Properties().Select(p => p.Name))}");
+                            
+                            // Inspeccionar propiedad 'extra'
+                            var extraToken = userDataObj["extra"];
+                            if (extraToken != null)
+                            {
+                                LogToFile($"[BIMAuthService.LoginAsync] 🔍 'extra' found, Type: {extraToken.Type}");
+                                if (extraToken.Type == JTokenType.Object)
+                                {
+                                    var extraKeys = ((JObject)extraToken).Properties().Select(p => p.Name);
+                                    LogToFile($"[BIMAuthService.LoginAsync] 🔍 'extra' keys: {string.Join(", ", extraKeys)}");
+                                    
+                                    // Intentar obtener CompanyDataConfig desde extra
+                                    var companyDataFromExtra = extraToken["CompanyDataConfig"];
+                                    if (companyDataFromExtra != null)
+                                    {
+                                        companyDataConfig = companyDataFromExtra.Value<string>();
+                                        LogToFile($"[BIMAuthService.LoginAsync] ✅ CompanyDataConfig encontrada EN 'extra': '{companyDataConfig}'");
+                                    }
+                                }
+                            }
+                            
+                            // Si aún no se encontró, intentar en nivel raíz
+                            if (string.IsNullOrWhiteSpace(companyDataConfig))
+                            {
+                                var companyDataToken = userDataObj["CompanyDataConfig"];
+                                LogToFile($"[BIMAuthService.LoginAsync] 🔍 CompanyDataToken (root) null? {companyDataToken == null}, Type: {companyDataToken?.Type}");
+                                
+                                companyDataConfig = companyDataToken?.Value<string>();
+                                LogToFile($"[BIMAuthService.LoginAsync] 🔍 CompanyDataConfig value: '{companyDataConfig}', Length: {companyDataConfig?.Length ?? 0}");
+                                
+                                if (!string.IsNullOrWhiteSpace(companyDataConfig))
+                                {
+                                    LogToFile($"[BIMAuthService.LoginAsync] ✅ CompanyDataConfig encontrada: {companyDataConfig}");
+                                }
+                                else
+                                {
+                                    LogToFile($"[BIMAuthService.LoginAsync] ⚠️ CompanyDataConfig está vacía o null");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogToFile($"[BIMAuthService.LoginAsync] ❌ Error extrayendo CompanyDataConfig: {ex.GetType().Name} - {ex.Message}");
+                    }
+
                     if (ok)
                     {
                         // Guardar token y usuario
@@ -164,7 +222,8 @@ namespace RoslynCopilotTest.Services
                         _currentUser = new UserInfo
                         {
                             Usuario = usuario,
-                            Plan = plan
+                            Plan = plan,
+                            CompanyDataConfig = companyDataConfig
                         };
 
                         // Persistir token de forma segura
@@ -483,6 +542,29 @@ namespace RoslynCopilotTest.Services
     {
         public string Usuario { get; set; }
         public string Plan { get; set; }
+
+        /// <summary>
+        /// Configuration for company data variables (format: "var1,id1,sheet1;var2,id2,sheet2")
+        /// </summary>
+        public string CompanyDataConfig { get; set; }
+
+        /// <summary>
+        /// List of company data variables loaded from the server
+        /// </summary>
+        public List<CompanyDataVariable> CompanyDataVariables { get; set; } = new List<CompanyDataVariable>();
+
+        /// <summary>
+        /// Dictionary containing the actual company data, keyed by variable name
+        /// </summary>
+        public Dictionary<string, object> CompanyData { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Get the list of company data variables
+        /// </summary>
+        public List<CompanyDataVariable> GetCompanyDataVariables()
+        {
+            return CompanyDataVariables ?? new List<CompanyDataVariable>();
+        }
     }
 
     /// <summary>

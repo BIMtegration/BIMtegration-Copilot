@@ -33,13 +33,6 @@ namespace RoslynCopilotTest.UI
     {
         // ...existing fields...
 
-        // Handler para el botón Actualizar Script
-        private void UpdateScriptButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Abrir ventana de selector de scripts para actualizar
-            var selector = new ScriptUpdateSelectorWindow();
-            selector.ShowDialog();
-        }
         private List<ScriptCategory> _categories;
         private List<ScriptCategory> _allCategories; // Copia completa para filtrado
         private StackPanel _scriptsContainer;
@@ -69,15 +62,10 @@ namespace RoslynCopilotTest.UI
         // AI Modeling tab (controlled by BIMtegration authentication)
         private TabItem _aiModelingTab;
         
-    private Button _addScriptButton;
-    private Button _openFileButton;
-    private Button _exportButton;
-    private Button _historyButton;
-    private Button _updateScriptButton;
-    private TabItem _advancedTab;
-    private WpfTextBox _logsTextBox;  // Display para los logs de debug
-        
-        // Controles del AI Assistant integrado
+        private Button _openFileButton;
+        private Button _exportButton;
+        private TabItem _advancedTab;
+        private WpfTextBox _logsTextBox;  // Display para los logs de debug        // Controles del AI Assistant integrado
         private WpfTextBox _aiPromptBox;
         private WpfTextBox _aiContextBox;
         private WpfTextBox _aiGeneratedCodeBox;
@@ -444,6 +432,12 @@ namespace RoslynCopilotTest.UI
             basicImportButton.Margin = new Thickness(5, 2, 5, 2); // mismo margen que otros botones
             basicImportButton.ToolTip = "Import scripts from a JSON file";
 
+            _exportButton = CreateStyledButton("📤 Export Scripts", false);
+            _exportButton.Click += ExportButton_Click;
+            _exportButton.HorizontalAlignment = HorizontalAlignment.Stretch;
+            _exportButton.Margin = new Thickness(5, 2, 5, 2);
+            _exportButton.ToolTip = "Export selected scripts to a JSON file";
+
             var refreshButton = CreateStyledButton("🔄 Refresh List", false);
             // Uno debajo del otro y mismo ancho dinámico
             refreshButton.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -456,6 +450,7 @@ namespace RoslynCopilotTest.UI
             };
 
             quickActionsPanel.Children.Add(basicImportButton);
+            quickActionsPanel.Children.Add(_exportButton);
             quickActionsPanel.Children.Add(refreshButton);
 
             // (Eliminado: botón y lógica de catálogo online)
@@ -493,46 +488,22 @@ namespace RoslynCopilotTest.UI
 
             var advancedStack = new StackPanel { Margin = new Thickness(10) };
 
-            // AGREGAR: Panel de botones premium al inicio
-            var premiumPanel = CreatePremiumButtonsPanel();
-            advancedStack.Children.Add(premiumPanel);
+            // Add company data variables panel at the top
+            var companyDataPanel = CreateCompanyDataPanel();
+            advancedStack.Children.Add(companyDataPanel);
 
-            // Separador visual
-            var separator = new Border
+            // Visual separator
+            var companySeparator = new Border
             {
                 Height = 1,
                 Background = new SolidColorBrush(WpfColor.FromRgb(63, 63, 70)),
                 Margin = new Thickness(0, 10, 0, 10)
             };
-            advancedStack.Children.Add(separator);
+            advancedStack.Children.Add(companySeparator);
 
-            // Título de funciones de gestión
-            var managementTitle = new TextBlock
-            {
-                Text = "⚙️ MANAGEMENT FUNCTIONS",
-                FontWeight = FontWeights.Bold,
-                FontSize = 12,
-                Foreground = new SolidColorBrush(WpfColor.FromRgb(0, 120, 212)),
-                Margin = new Thickness(0, 0, 0, 10)
-            };
-            advancedStack.Children.Add(managementTitle);
-            
-            _addScriptButton = CreateStyledButton("➕ New Script", true);
-            _addScriptButton.Click += AddScriptButton_Click;
-            _addScriptButton.Margin = new Thickness(0, 8, 0, 0);
-
-                // Button to update existing scripts
-                _updateScriptButton = CreateStyledButton("🔄 Update Script", true);
-                _updateScriptButton.Click += UpdateScriptButton_Click;
-                _updateScriptButton.Margin = new Thickness(0, 8, 0, 0);
-            
-            _exportButton = CreateStyledButton("📤 Export Scripts", false);
-            _exportButton.Click += ExportButton_Click;
-            _exportButton.Margin = new Thickness(0, 5, 0, 0);
-
-            advancedStack.Children.Add(_addScriptButton);
-            advancedStack.Children.Add(_exportButton);
-                advancedStack.Children.Add(_updateScriptButton);
+            // AGREGAR: Panel de botones premium al inicio
+            var premiumPanel = CreatePremiumButtonsPanel();
+            advancedStack.Children.Add(premiumPanel);
                 
             advancedScrollViewer.Content = advancedStack;
             _advancedTab.Content = advancedScrollViewer;
@@ -611,12 +582,6 @@ namespace RoslynCopilotTest.UI
             _openFileButton.Click += OpenFileButton_Click;
             _openFileButton.Margin = new Thickness(0, 0, 0, 5);
             toolsStack.Children.Add(_openFileButton);
-
-            // Logs button (renamed from Historial)
-            _historyButton = CreateStyledButton("📋 Logs", false);
-            _historyButton.Click += HistoryButton_Click;
-            _historyButton.Margin = new Thickness(0, 5, 0, 0);
-            toolsStack.Children.Add(_historyButton);
 
             toolsPanel.Child = toolsStack;
             configStack.Children.Add(toolsPanel);
@@ -859,10 +824,10 @@ namespace RoslynCopilotTest.UI
             filtersGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             filtersGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            // Primera fila: Filtro por categoría
+            // First row: Category filter
             var categoryLabel = new TextBlock
             {
-                Text = "📂 Filter by category:",
+                Text = "📂 Filter by Category:",
                 FontSize = 11,
                 FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 0, 5),
@@ -884,10 +849,10 @@ namespace RoslynCopilotTest.UI
             WpfGrid.SetRow(_categoryFilter, 0);
             WpfGrid.SetColumn(_categoryFilter, 0);
 
-            // Segunda fila: Búsqueda de texto
+            // Second row: Text search
             var searchLabel = new TextBlock
             {
-                Text = "🔍 Search scripts:",
+                Text = "🔍 Search Scripts:",
                 FontSize = 11,
                 FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 0, 0, 5),
@@ -946,7 +911,7 @@ namespace RoslynCopilotTest.UI
             WpfGrid.SetRow(searchPanel, 1);
             filtersGrid.Children.Add(searchPanel);
 
-            // Tercera fila: Filtro de favoritos
+            // Third row: Favorites filter
             _favoritesFilter = new Button
             {
                 Content = "⭐ Show favorites only",
@@ -2102,21 +2067,6 @@ namespace RoslynCopilotTest.UI
 
         #region Event Handlers para botones de acción
 
-        private void AddScriptButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Abrir ventana del editor de scripts
-                var editorWindow = new ScriptEditorWindow(OnScriptSaved);
-                editorWindow.Show();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error opening editor: {ex.Message}", "Error", 
-                               MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
         /// <summary>
         /// Callback cuando se guarda un script nuevo desde el editor
         /// </summary>
@@ -2409,19 +2359,6 @@ namespace RoslynCopilotTest.UI
             }
         }
 
-        private void HistoryButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                RefreshLogsDisplay();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar logs: {ex.Message}",
-                               "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
         /// <summary>
         /// Carga y muestra los logs de debug desde el archivo premium-buttons-debug.log
         /// </summary>
@@ -2537,10 +2474,8 @@ namespace RoslynCopilotTest.UI
             var isEnabled = _bimAuthService.IsAuthenticated;
             
             // Bloquear/desbloquear botones en Advanced tab
-            if (_addScriptButton != null) _addScriptButton.IsEnabled = isEnabled;
             if (_openFileButton != null) _openFileButton.IsEnabled = true;  // Always available
-            if (_exportButton != null) _exportButton.IsEnabled = isEnabled;
-            if (_historyButton != null) _historyButton.IsEnabled = true;    // Always available
+            if (_exportButton != null) _exportButton.IsEnabled = true;      // Always available (moved to Basic)
             
             // Bloquear/desbloquear tabs completos
             if (_advancedTab != null) _advancedTab.IsEnabled = isEnabled;
@@ -2639,6 +2574,25 @@ namespace RoslynCopilotTest.UI
                         else
                         {
                             LogPremium($"[Connect Handler] ⚠️ No hay botones premium para descargar");
+                        }
+                        
+                        // Wait a moment for company data background download to potentially complete
+                        await System.Threading.Tasks.Task.Delay(2000);
+                        
+                        // Refresh the company data panel to show loaded data
+                        RefreshCompanyDataPanel();
+                        
+                        // If company data hasn't loaded yet, wait and retry periodically (up to 10 seconds total)
+                        int maxRetries = 4;
+                        int retryCount = 0;
+                        while (retryCount < maxRetries && 
+                               (_bimAuthService.CurrentUser?.CompanyData?.Count ?? 0) == 0 &&
+                               (_bimAuthService.CurrentUser?.CompanyDataVariables?.Count ?? 0) == 0)
+                        {
+                            await System.Threading.Tasks.Task.Delay(2000);
+                            RefreshCompanyDataPanel();
+                            retryCount++;
+                            LogPremium($"[Connect Handler] 🔄 Retrying company data panel refresh ({retryCount}/{maxRetries})");
                         }
                         
                         MessageBox.Show($"✅ Welcome {user?.Usuario}!\n\nPlan: {user?.Plan ?? "Free"}", 
@@ -2779,6 +2733,229 @@ namespace RoslynCopilotTest.UI
             {
                 System.Diagnostics.Debug.WriteLine($"[Premium Buttons] Error crítico: {ex.Message}");
                 LogPremium($"[DownloadPremiumButtonsAsync] ❌ Error crítico: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        /// <summary>
+        /// Creates a panel showing company data variables and their loading status
+        /// </summary>
+        private Border CreateCompanyDataPanel()
+        {
+            LogPremium($"[CreateCompanyDataPanel] ===== INICIO CREACIÓN =====");
+            LogPremium($"[CreateCompanyDataPanel] _bimAuthService.IsAuthenticated: {_bimAuthService.IsAuthenticated}");
+            LogPremium($"[CreateCompanyDataPanel] _bimAuthService.CurrentUser null? {_bimAuthService.CurrentUser == null}");
+            
+            if (_bimAuthService.CurrentUser != null)
+            {
+                LogPremium($"[CreateCompanyDataPanel] 🔍 CurrentUser.CompanyDataConfig: '{_bimAuthService.CurrentUser.CompanyDataConfig}'");
+                LogPremium($"[CreateCompanyDataPanel] 🔍 CurrentUser.CompanyData count: {_bimAuthService.CurrentUser.CompanyData?.Count ?? 0}");
+                LogPremium($"[CreateCompanyDataPanel] 🔍 CurrentUser.CompanyDataVariables count: {_bimAuthService.CurrentUser.CompanyDataVariables?.Count ?? 0}");
+            }
+            
+            var mainBorder = new Border
+            {
+                Background = new SolidColorBrush(WpfColor.FromRgb(62, 62, 64)),
+                BorderBrush = new SolidColorBrush(WpfColor.FromRgb(63, 63, 70)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(15),
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+
+            var mainStack = new StackPanel();
+
+            // Title
+            var titleBlock = new TextBlock
+            {
+                Text = "📊 COMPANY DATA VARIABLES",
+                FontSize = 14,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(WpfColor.FromRgb(0, 120, 212)),
+                Margin = new Thickness(0, 0, 0, 10)
+            };
+            mainStack.Children.Add(titleBlock);
+
+            // Check if user is authenticated
+            if (!_bimAuthService.IsAuthenticated)
+            {
+                LogPremium($"[CreateCompanyDataPanel] ⚠️ Not authenticated");
+                var notLoggedText = new TextBlock
+                {
+                    Text = "❌ Not logged in. Please login to see company data.",
+                    Foreground = Brushes.LightGray,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 5, 0, 0)
+                };
+                mainStack.Children.Add(notLoggedText);
+                mainBorder.Child = mainStack;
+                return mainBorder;
+            }
+
+            // Get company data variables
+            var variables = _bimAuthService.CurrentUser?.GetCompanyDataVariables();
+            LogPremium($"[CreateCompanyDataPanel] 🔍 GetCompanyDataVariables() returned: {variables?.Count() ?? 0} items");
+
+            if (variables == null || variables.Count() == 0)
+            {
+                LogPremium($"[CreateCompanyDataPanel] ⚠️ No company variables loaded");
+                var noDataText = new TextBlock
+                {
+                    Text = "⚠️ No company variables loaded",
+                    Foreground = Brushes.LightGray,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 5, 0, 0)
+                };
+                mainStack.Children.Add(noDataText);
+                mainBorder.Child = mainStack;
+                return mainBorder;
+            }
+
+            LogPremium($"[CreateCompanyDataPanel] ✅ Found {variables.Count()} variables to display");
+
+            // Display each variable
+            foreach (var variable in variables)
+            {
+                var row = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(0, 0, 0, 8)
+                };
+
+                // Status icon
+                var statusIcon = new TextBlock
+                {
+                    Text = variable.GetStatusIcon(),
+                    FontSize = 12,
+                    Margin = new Thickness(0, 0, 8, 0),
+                    Foreground = Brushes.White
+                };
+                row.Children.Add(statusIcon);
+
+                // Variable name
+                var nameText = new TextBlock
+                {
+                    Text = variable.VariableName,
+                    FontSize = 12,
+                    Foreground = Brushes.White,
+                    MinWidth = 120
+                };
+                row.Children.Add(nameText);
+
+                // Size and details
+                if (variable.Status == "Loaded")
+                {
+                    var sizeText = new TextBlock
+                    {
+                        Text = $"({variable.DataSize} KB)",
+                        FontSize = 11,
+                        Foreground = Brushes.LightGray,
+                        Margin = new Thickness(10, 0, 0, 0)
+                    };
+                    row.Children.Add(sizeText);
+                }
+                else if (variable.Status == "Error" && !string.IsNullOrEmpty(variable.ErrorMessage))
+                {
+                    var errorText = new TextBlock
+                    {
+                        Text = $"Error: {variable.ErrorMessage}",
+                        FontSize = 11,
+                        Foreground = new SolidColorBrush(WpfColor.FromRgb(255, 96, 96)),
+                        Margin = new Thickness(10, 0, 0, 0)
+                    };
+                    row.Children.Add(errorText);
+                }
+
+                mainStack.Children.Add(row);
+            }
+
+            // Add refresh button
+            var refreshButton = new Button
+            {
+                Content = "🔄 Refresh (Logout required)",
+                Background = new SolidColorBrush(WpfColor.FromRgb(62, 62, 64)),
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(WpfColor.FromRgb(100, 100, 100)),
+                BorderThickness = new Thickness(1),
+                Padding = new Thickness(10, 8, 10, 8),
+                Margin = new Thickness(0, 10, 0, 0),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                FontSize = 11
+            };
+            refreshButton.Click += (s, e) =>
+            {
+                var result = MessageBox.Show(
+                    "To refresh company data, you must logout and login again. Proceed?",
+                    "Refresh Company Data",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question
+                );
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    _bimAuthService.Logout();
+                }
+            };
+            mainStack.Children.Add(refreshButton);
+
+            mainBorder.Child = mainStack;
+            return mainBorder;
+        }
+
+
+        /// <summary>
+        /// Refreshes the company data panel after background download completes
+        /// </summary>
+        public void RefreshCompanyDataPanel()
+        {
+            try
+            {
+                LogPremium($"[RefreshCompanyDataPanel] 🔍 Called - tabControl null? {_tabControl == null}");
+                if (_tabControl == null || _tabControl.Items.Count <= 1)
+                    return;
+
+                var advancedTab = _tabControl.Items[1] as TabItem;
+                LogPremium($"[RefreshCompanyDataPanel] 🔍 advancedTab null? {advancedTab == null}");
+                if (advancedTab == null)
+                    return;
+
+                var scrollViewer = advancedTab.Content as ScrollViewer;
+                LogPremium($"[RefreshCompanyDataPanel] 🔍 scrollViewer null? {scrollViewer == null}");
+                
+                if (scrollViewer?.Content is StackPanel outerStack)
+                {
+                    LogPremium($"[RefreshCompanyDataPanel] 🔍 outerStack children: {outerStack.Children.Count}");
+                    
+                    // Find company data panel (first Border with "COMPANY DATA" text)
+                    int companyDataPanelIndex = -1;
+                    for (int i = 0; i < outerStack.Children.Count; i++)
+                    {
+                        if (outerStack.Children[i] is Border border && 
+                            border.Child is StackPanel innerStack &&
+                            innerStack.Children.Count > 0 &&
+                            innerStack.Children[0] is TextBlock textBlock &&
+                            textBlock.Text.Contains("COMPANY DATA"))
+                        {
+                            companyDataPanelIndex = i;
+                            LogPremium($"[RefreshCompanyDataPanel] 🔍 Found company data panel at index {i}");
+                            break;
+                        }
+                    }
+
+                    LogPremium($"[RefreshCompanyDataPanel] 🔍 companyDataPanelIndex: {companyDataPanelIndex}");
+                    
+                    if (companyDataPanelIndex >= 0)
+                    {
+                        outerStack.Children.RemoveAt(companyDataPanelIndex);
+                        var newCompanyDataPanel = CreateCompanyDataPanel();
+                        outerStack.Children.Insert(companyDataPanelIndex, newCompanyDataPanel);
+                        LogPremium($"[RefreshCompanyDataPanel] ✅ Panel refreshed");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogPremium($"[RefreshCompanyDataPanel] ❌ Error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ScriptPanel] Error refreshing company data panel: {ex.Message}");
             }
         }
 
@@ -3157,24 +3334,38 @@ namespace RoslynCopilotTest.UI
                         {
                             LogPremium($"[RefreshPremiumPanel] outerStack.Children.Count = {outerStack.Children.Count}");
                             
-                            if (outerStack.Children.Count > 0 && outerStack.Children[0] is Border)
+                            // Find the premium panel (second Border) - skip company data panel (first Border)
+                            int premiumPanelIndex = -1;
+                            for (int i = 2; i < outerStack.Children.Count; i++)
                             {
-                                LogPremium($"[RefreshPremiumPanel] Primer hijo es Border, removiendo...");
+                                if (outerStack.Children[i] is Border border && 
+                                    border.Child is StackPanel innerStack &&
+                                    innerStack.Children.Count > 0 &&
+                                    innerStack.Children[0] is TextBlock textBlock &&
+                                    textBlock.Text.Contains("PREMIUM"))
+                                {
+                                    premiumPanelIndex = i;
+                                    break;
+                                }
+                            }
+                            
+                            if (premiumPanelIndex >= 0)
+                            {
+                                LogPremium($"[RefreshPremiumPanel] Premium panel encontrado en índice {premiumPanelIndex}, removiendo...");
                                 
                                 // Reemplazar el premium panel con uno actualizado
-                                outerStack.Children.RemoveAt(0);
-                                LogPremium($"[RefreshPremiumPanel] Border removido. Creando nuevo panel...");
+                                outerStack.Children.RemoveAt(premiumPanelIndex);
+                                LogPremium($"[RefreshPremiumPanel] Panel removido. Creando nuevo panel...");
                                 
                                 var newPremiumPanel = CreatePremiumButtonsPanel();
                                 LogPremium($"[RefreshPremiumPanel] Nuevo panel creado. Insertando...");
                                 
-                                outerStack.Children.Insert(0, newPremiumPanel);
+                                outerStack.Children.Insert(premiumPanelIndex, newPremiumPanel);
                                 LogPremium($"[RefreshPremiumPanel] ✅ Panel de botones actualizado exitosamente");
                             }
                             else
                             {
-                                string childType = outerStack.Children.Count > 0 ? outerStack.Children[0]?.GetType().Name ?? "unknown" : "no children";
-                                LogPremium($"[RefreshPremiumPanel] ❌ ERROR: Primer hijo NO es Border. Tipo: {childType}");
+                                LogPremium($"[RefreshPremiumPanel] ⚠️ No se encontró el premium panel para actualizar");
                             }
                         }
                         else
@@ -3996,6 +4187,10 @@ namespace RoslynCopilotTest.UI
             }
             catch { /* Ignorar errores de logging */ }
         }
+
+        /// <summary>
+        /// Gets the stored premium buttons list for manual download
+        /// </summary>
 
         #endregion
     }

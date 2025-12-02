@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -9,6 +10,7 @@ using WpfTextBox = System.Windows.Controls.TextBox;
 using MediaColor = System.Windows.Media.Color;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace RoslynCopilotTest.UI
 {
@@ -259,8 +261,66 @@ namespace RoslynCopilotTest.UI
                     {
                         foreach (var btn in PremiumButtons)
                         {
-                            LogToFile($"  - {btn.name} (Empresa: {btn.company})");
+                            LogToFile($"  - {btn.name} (Company: {btn.company})");
                         }
+                    }
+                    
+                    // DEBUG: Company data config
+                    LogToFile($"[BIMLoginWindow] 🔍 DEBUG CompanyData:");
+                    LogToFile($"[BIMLoginWindow] 🔍   result.User null? {result.User == null}");
+                    if (result.User != null)
+                    {
+                        LogToFile($"[BIMLoginWindow] 🔍   CompanyDataConfig: '{result.User.CompanyDataConfig}'");
+                        LogToFile($"[BIMLoginWindow] 🔍   CompanyDataConfig null? {result.User.CompanyDataConfig == null}");
+                        LogToFile($"[BIMLoginWindow] 🔍   CompanyDataConfig empty? {string.IsNullOrWhiteSpace(result.User.CompanyDataConfig)}");
+                        LogToFile($"[BIMLoginWindow] 🔍   CompanyDataConfig length: {result.User.CompanyDataConfig?.Length ?? 0}");
+                    }
+                    
+                    // NEW: Start background download of company data
+                    if (result.User != null && !string.IsNullOrWhiteSpace(result.User.CompanyDataConfig))
+                    {
+                        LogToFile($"[BIMLoginWindow] ✅ Company data config found, starting background download");
+                        LogToFile($"[BIMLoginWindow] Starting company data download in background");
+                        
+                        // Ensure CompanyData dictionary is initialized
+                        if (result.User.CompanyData == null)
+                        {
+                            result.User.CompanyData = new Dictionary<string, object>();
+                        }
+                        
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                var companyDataVars = await CompanyDataCacheManager.DownloadCompanyDataAsync(
+                                    result.User.CompanyDataConfig,
+                                    result.Token,
+                                    msg => LogToFile(msg)
+                                );
+
+                                if (companyDataVars != null && companyDataVars.Count > 0)
+                                {
+                                    // Update CompanyDataVariables list
+                                    result.User.CompanyDataVariables = companyDataVars.Values.ToList();
+                                    
+                                    // Update CompanyData dictionary with actual data
+                                    foreach (var varName in companyDataVars.Keys)
+                                    {
+                                        if (companyDataVars[varName].Data != null)
+                                        {
+                                            result.User.CompanyData[varName] = companyDataVars[varName].Data;
+                                        }
+                                    }
+                                    
+                                    LogToFile($"[BIMLoginWindow] ✅ Company data loaded: {companyDataVars.Count} variables");
+                                    LogToFile($"[BIMLoginWindow] CompanyData dict now has {result.User.CompanyData.Count} entries");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogToFile($"[BIMLoginWindow] ❌ Error in company data download: {ex.Message}");
+                            }
+                        });
                     }
                     
                     Close();
