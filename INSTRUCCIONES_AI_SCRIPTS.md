@@ -1437,3 +1437,295 @@ try {
 } catch (Exception ex) {
     return $"❌ Error: {ex.Message}";
 }
+
+## 21. DATOS DE EMPRESA (COMPANY DATA)
+
+### ¿Qué son los Company Data?
+
+Los **Company Data** son variables de datos específicas de tu empresa que se descargan automáticamente cuando te autentiques con una cuenta premium. Son datos que generalmente están almacenados en Google Sheets y se vinculan a través de tu perfil de usuario.
+
+**Características:**
+- ✅ Descarga automática al hacer login
+- ✅ Almacenados en caché durante la sesión
+- ✅ Accesibles desde scripts premium
+- ✅ Formato: Variables con Sheet ID y Sheet Name
+- ✅ Disponibles después de 2-10 segundos desde el login
+
+### Ubicación de Company Data en el Contexto
+
+Después de autenticarte, los datos están disponibles en:
+
+```csharp
+// En BIMAuthService - Datos del usuario autenticado
+var currentUser = BIMAuthService.CurrentUser;
+
+// Acceder a los datos de empresa
+var companyData = currentUser?.CompanyData;  // Dictionary<string, JToken>
+var variables = currentUser?.CompanyDataVariables;  // List<CompanyDataVariable>
+```
+
+### Estructura de Company Data
+
+El formato de configuración es:
+```
+variable1,sheetId1,sheetName1;variable2,sheetId2,sheetName2;...
+```
+
+**Ejemplo real:**
+```
+Datenbank,1j02RBg7BdZQAgOhPXM0rRHRI_BNohZuzBDNTYlKZHy4,BDB
+```
+
+Este ejemplo define:
+- **Variable Name**: `Datenbank`
+- **Sheet ID**: `1j02RBg7BdZQAgOhPXM0rRHRI_BNohZuzBDNTYlKZHy4`
+- **Sheet Name**: `BDB`
+
+### Acceder a Company Data en Scripts
+
+#### 1. Obtener la lista de variables disponibles
+
+```csharp
+// Obtener variables
+var currentUser = BIMAuthService.CurrentUser;
+if (currentUser?.CompanyDataVariables == null || currentUser.CompanyDataVariables.Count == 0)
+{
+    return "❌ No hay datos de empresa disponibles. Auténtica primero.";
+}
+
+// Listar variables disponibles
+string variablesList = string.Join(", ", 
+    currentUser.CompanyDataVariables.Select(v => $"{v.VariableName} ({v.Status})"));
+
+return $"✅ Variables disponibles: {variablesList}";
+```
+
+#### 2. Acceder a los datos de una variable específica
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+var currentUser = BIMAuthService.CurrentUser;
+var companyData = currentUser?.CompanyData;
+
+if (companyData == null || companyData.Count == 0)
+{
+    return "❌ No hay datos de empresa.";
+}
+
+// Obtener datos de una variable
+if (companyData.TryGetValue("Datenbank", out var databaseData))
+{
+    // El data es un JToken (puede ser array, objeto, etc.)
+    var json = JsonConvert.SerializeObject(databaseData, Formatting.Indented);
+    
+    // Mostrar primeras 500 caracteres
+    string preview = json.Length > 500 
+        ? json.Substring(0, 500) + "..." 
+        : json;
+    
+    return $"✅ Datos de Datenbank:\n{preview}";
+}
+else
+{
+    return "❌ Variable 'Datenbank' no encontrada.";
+}
+```
+
+#### 3. Iterar sobre los datos (si es un array)
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+var currentUser = BIMAuthService.CurrentUser;
+var companyData = currentUser?.CompanyData;
+
+if (companyData?.TryGetValue("Datenbank", out var databaseData) != true)
+{
+    return "❌ Datos no disponibles.";
+}
+
+try
+{
+    // Si los datos son un array
+    if (databaseData is JArray array)
+    {
+        int count = array.Count;
+        return $"✅ {count} registros encontrados en Datenbank";
+    }
+    else if (databaseData is JObject obj)
+    {
+        // Si son un objeto
+        var keys = obj.Properties().Select(p => p.Name).ToList();
+        return $"✅ Objeto con propiedades: {string.Join(", ", keys)}";
+    }
+    else
+    {
+        return $"✅ Datos: {databaseData}";
+    }
+}
+catch (Exception ex)
+{
+    return $"❌ Error procesando datos: {ex.Message}";
+}
+```
+
+#### 4. Usar Company Data para generar elementos
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+var currentUser = BIMAuthService.CurrentUser;
+var companyData = currentUser?.CompanyData;
+
+if (companyData?.TryGetValue("Datenbank", out var databaseData) != true)
+{
+    return "❌ Datos de empresa no disponibles.";
+}
+
+try
+{
+    if (databaseData is JArray dataArray)
+    {
+        int elementosCreados = 0;
+        
+        foreach (var item in dataArray)
+        {
+            // Procesar cada registro
+            string nombre = item["name"]?.ToString();
+            string codigo = item["code"]?.ToString();
+            
+            if (!string.IsNullOrEmpty(nombre) && !string.IsNullOrEmpty(codigo))
+            {
+                // Usar los datos para crear/modificar elementos
+                // Por ejemplo, crear una etiqueta de texto
+                elementosCreados++;
+            }
+        }
+        
+        return $"✅ Procesados {elementosCreados} registros de Company Data";
+    }
+    else
+    {
+        return "❌ Los datos no están en formato de array.";
+    }
+}
+catch (Exception ex)
+{
+    return $"❌ Error: {ex.Message}";
+}
+```
+
+### Tiempo de Disponibilidad
+
+**⚠️ IMPORTANTE:** Después de autenticarte:
+
+- **Primeros 2 segundos**: Los datos pueden no estar completamente descargados
+- **2-10 segundos**: El sistema intenta descargar los datos con reintentos automáticos
+- **Después de 10 segundos**: Los datos están disponibles o se mostró un error
+
+**Recomendación:** Si accedes a Company Data poco después del login, implementa un pequeño delay:
+
+```csharp
+// Si acabas de hacer login
+await Task.Delay(3000);  // Esperar 3 segundos para asegurar carga
+
+var currentUser = BIMAuthService.CurrentUser;
+var companyData = currentUser?.CompanyData;
+
+if (companyData?.Count > 0)
+{
+    return "✅ Datos listos para usar";
+}
+else
+{
+    return "⚠️ Datos aún no disponibles. Intenta de nuevo.";
+}
+```
+
+### Estructura de CompanyDataVariable (Modelo)
+
+Cada variable en `CompanyDataVariables` tiene esta estructura:
+
+```csharp
+public class CompanyDataVariable
+{
+    public string VariableName { get; set; }      // "Datenbank"
+    public string SheetId { get; set; }           // "1j02RBg7..."
+    public string SheetName { get; set; }         // "BDB"
+    
+    public JToken Data { get; set; }              // Datos descargados
+    public string Status { get; set; }            // "Loaded", "Error", "Pending"
+    public string ErrorMessage { get; set; }      // Si hay error
+    public int SizeInKb { get; set; }             // Tamaño en KB
+}
+```
+
+**Ejemplo de uso:**
+
+```csharp
+var currentUser = BIMAuthService.CurrentUser;
+
+foreach (var variable in currentUser?.CompanyDataVariables ?? new List<CompanyDataVariable>())
+{
+    string info = $"{variable.VariableName}: {variable.Status}";
+    
+    if (variable.Status == "Loaded")
+    {
+        info += $" ({variable.SizeInKb} KB)";
+    }
+    else if (variable.Status == "Error")
+    {
+        info += $" - Error: {variable.ErrorMessage}";
+    }
+    
+    TaskDialog.Show("Variable", info);
+}
+```
+
+### Debugging Company Data
+
+Si los datos no aparecen:
+
+1. **Verifica autenticación**: ¿Mostraste el formulario de login?
+   ```csharp
+   if (BIMAuthService.CurrentUser == null)
+       return "❌ No autenticado. Ejecuta el login primero.";
+   ```
+
+2. **Verifica si están en descarga**: 
+   ```csharp
+   var companyData = BIMAuthService.CurrentUser?.CompanyData;
+   if (companyData?.Count == 0)
+       return "⚠️ Los datos están descargando. Espera 5 segundos e intenta de nuevo.";
+   ```
+
+3. **Verifica el formato de configuración**: El backend debe enviar:
+   ```json
+   {
+     "userData": {
+       "extra": {
+         "CompanyDataConfig": "Datenbank,1j02RBg7...,BDB"
+       }
+     }
+   }
+   ```
+
+4. **Revisa logs**: Ve a Settings → Logs y busca mensajes con `[CompanyData]`
+
+### Almacenamiento en Caché
+
+Los datos se almacenan en:
+```
+C:\Users\[USERNAME]\AppData\Roaming\RoslynCopilot\company-data-cache\
+```
+
+Se guardan en formato JSON comprimido para acceso rápido en la siguiente sesión.
+
+### ⚠️ Limitaciones y Consideraciones
+
+- Los datos se borran al cerrar Revit (se descargan nuevamente al iniciar sesión)
+- El tamaño máximo recomendado es 10 MB por variable
+- Las variables se descargan en paralelo (máximo 3 reintentos por variable)
+- Timeout de 15 segundos por descarga individual
+- Los errores de descarga se loguean pero no impiden el resto de operaciones
